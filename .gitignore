@@ -1,0 +1,105 @@
+# 环境变量文件 - 包含数据库密码等敏感信息
+.env
+.env.*
+!.env.example
+
+# Rails 加密凭证
+config/master.key
+config/credentials/*.key
+**/config/master.key
+**/config/credentials/*.key
+
+# 数据库文件
+*.sqlite3
+*.sqlite3-*
+db/*.sqlite3
+db/*.sqlite3-*
+
+# 日志文件
+log/*
+*.log
+!log/.keep
+
+# 临时文件
+tmp/*
+!tmp/.keep
+tmp/pids/*
+tmp/cache/*
+tmp/sockets/*
+tmp/storage/*
+!tmp/storage/.keep
+!tmp/pids/.keep
+!tmp/cache/.keep
+!tmp/sockets/.keep
+
+# 上传的文件
+storage/*
+!storage/.keep
+public/uploads/*
+!public/uploads/.keep
+
+# 预编译的资源
+public/assets/
+public/packs/
+public/packs-test/
+
+# Yarn
+node_modules/
+yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+
+# IDEs 和编辑器配置
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Ruby 版本管理
+.ruby-version
+.rbenv-version
+.rvmrc
+
+# Bundler 配置
+.bundle/
+vendor/bundle/
+
+# 测试覆盖率报告
+coverage/
+.coverage
+*.cover
+
+# RDoc 生成的文档
+doc/
+.yardoc/
+
+# 本地配置文件(如果你有的话)
+config/database.yml.local
+config/secrets.yml.local
+config/settings.local.yml
+config/settings/*.local.yml
+config/environments/*.local.yml
+
+# SSL 证书
+*.pem
+*.key
+*.crt
+*.csr
+!config/ssl/.gitkeep
+
+# 缓存文件
+.sass-cache/
+.cache/
+
+# Capistrano 部署记录
+/config/deploy/production.rb
+/config/deploy/staging.rb
+
+# 其他敏感或临时文件
+.env.production
+.env.staging
+.byebug_history
+.annotate_solargraph_cache

@@ -1,0 +1,28 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  show_server_id: 1
+  real_server_id: 1
+  name: 木
+  flag: '["x","youtube"]'
+  rcmd_status: 1
+  svr_status: 1
+  open_time: 0
+
+two:
+  show_server_id: 2
+  real_server_id: 2
+  name: 葉
+  flag: "[]"
+  rcmd_status: 3
+  svr_status: 1
+  open_time: 0
+
+three:
+  show_server_id: 3
+  real_server_id: 3
+  name: 水
+  flag: "[]"
+  rcmd_status: 1
+  svr_status: 2
+  open_time: 0
