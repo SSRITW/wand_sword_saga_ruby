@@ -1,14 +1,17 @@
 class GameServer < ApplicationRecord
   serialize :flag, coder: JSON
 
-  def allow_entry?(isNew=true)
+  attr_accessor :connection_status, :boolean
+  attr_accessor :connect_ip, :string
+  attr_accessor :last_heartbeat_timestamp, :integer # 秒
+
+  def allow_entry?(is_new=true)
     if rcmd_status == 0 || svr_status == 0 || svr_status == 2
-      return false
-    elsif isNew && rcmd_status == 3
-      return false
+       false
+    elsif is_new && rcmd_status == 3
+       false
     else 
-      return true
+       true
     end
   end
-  
 end
