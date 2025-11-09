@@ -1,7 +1,7 @@
 class GameServer < ApplicationRecord
   serialize :flag, coder: JSON
 
-  attr_accessor :connection_status, :boolean
+  attr_accessor :connection_online, :boolean
   attr_accessor :connect_ip, :string
   attr_accessor :last_heartbeat_timestamp, :integer # 秒
 

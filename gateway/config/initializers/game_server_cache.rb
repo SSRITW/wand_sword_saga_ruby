@@ -18,26 +18,26 @@ module GameServerCache
 
     svr_map = Hash.new
     game_servers.each do |svr|
-      #起動状態を取得
+      # 起動状態を取得
       status_info = game_servers_status[svr.real_server_id]
       if status_info!=nil
-        svr.attr_accessor = status_info.connection_status
+        svr.connection_online = status_info.connection_online
         svr.connect_ip = status_info.connect_ip
       end
-      logger.debugger "game servers info: #{svr.to_s}"
+      Rails.logger.debug "game servers info: "+svr.to_s
       svr_map[svr.show_server_id]=svr
     end
-    #キャッシュに保存
+    # キャッシュに保存
     @game_servers = game_servers
     Rails.logger.info "game servers initialized...size:"+game_servers.size.to_s
   end
 
-  def self.change(real_id,connection_status,connect_ip)
+  def self.change(real_id,connection_online,connect_ip)
     MUTEX.synchronize do
       @game_servers.each do |svr|
         if real_id ==svr.real_server_id
           svr.connect_ip = connect_ip
-          svr.connection_status = connection_status
+          svr.connection_online = connection_online
           svr.last_heartbeat_timestamp = Time.now.to_i
         end
       end
@@ -60,14 +60,14 @@ Rails.application.config.after_initialize do
   GameServerCache.init
 
   Thread.new do
-    #game serverの状態変化を購読
+    # game serverの状態変化を購読
     $redis.subscribe(Constants::RedisConstants::GAME_SERVER_STATUS_SUBSCRIBE_KEY,
                      Constants::RedisConstants::GAME_SERVER_HEARTBEAT_SUBSCRIBE_KEY) do |on|
       on.message do |_channel, _message|
         case _channel
         when Constants::RedisConstants::GAME_SERVER_STATUS_SUBSCRIBE_KEY
           server_info = JSON.parse(_message)
-          GameServerCache.change(server_info.real_server_id,server_info.connection_status,server_info.connection_status)
+          GameServerCache.change(server_info[:real_server_id],server_info[:connection_online],server_info[:connect_ip])
           Rails.logger.info "game server　状態： #{_message}"
         when Constants::RedisConstants::GAME_SERVER_HEARTBEAT_SUBSCRIBE_KEY
           GameServerCache.heartbeat(_message.to_i)
