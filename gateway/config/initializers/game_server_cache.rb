@@ -1,6 +1,4 @@
 # frozen_string_literal: true
-require 'concurrent'
-
 module GameServerCache
   GAME_SERVER_CACHE_KEY = "game_servers"
   GAME_SERVER_STATUS_REDIS_KEY = "game:svr:status"
@@ -53,6 +51,7 @@ end
 
 # 初期化した後実行
 Rails.application.config.after_initialize do
+  Rails.logger.info "GameServerCache initializing..."
   GameServerCache.init
 
   Thread.new do
@@ -71,6 +70,6 @@ Rails.application.config.after_initialize do
       end
     end
   end
-  Rails.logger.info "初期化した。"
+  Rails.logger.info "GameServerCache initializing..."
 end
 
