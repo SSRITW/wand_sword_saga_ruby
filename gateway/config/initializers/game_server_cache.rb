@@ -1,14 +1,12 @@
 # frozen_string_literal: true
+require 'concurrent'
 
 module GameServerCache
   GAME_SERVER_CACHE_KEY = "game_servers"
   GAME_SERVER_STATUS_REDIS_KEY = "game:svr:status"
 
-  @game_servers = {}
-
-  # データのダーティライトを予防
-  # 预防线程竞争、脏写
-  MUTEX = Mutex.new
+  # スレッドセーフのデータ型を使い
+  @game_servers = Concurrent::Map.new
 
   # gameServerの基本情報(DB)と起動状態(redis)を初期化
   # 初始化游戏服的基本信息(DB)和实际运行状态(redis)
@@ -28,18 +26,16 @@ module GameServerCache
       svr_map[svr.show_server_id]=svr
     end
     # キャッシュに保存
-    @game_servers = game_servers
+    @game_servers = Concurrent::Map.new(game_servers)
     Rails.logger.info "game servers initialized...size:"+game_servers.size.to_s
   end
 
   def self.change(real_id,connection_online,connect_ip)
-    MUTEX.synchronize do
-      @game_servers.each do |svr|
-        if real_id ==svr.real_server_id
-          svr.connect_ip = connect_ip
-          svr.connection_online = connection_online
-          svr.last_heartbeat_timestamp = Time.now.to_i
-        end
+    @game_servers.each do |svr|
+      if real_id ==svr.real_server_id
+        svr.connect_ip = connect_ip
+        svr.connection_online = connection_online
+        svr.last_heartbeat_timestamp = Time.now.to_i
       end
     end
   end

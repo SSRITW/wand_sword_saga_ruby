@@ -52,4 +52,6 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 
   gem 'redis'
+
+  gem 'concurrent-ruby'
 end

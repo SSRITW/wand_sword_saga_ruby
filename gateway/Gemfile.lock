@@ -324,6 +324,7 @@ DEPENDENCIES
   bootsnap
   brakeman
   bundler-audit
+  concurrent-ruby
   debug
   dotenv-rails
   image_processing (~> 1.2)
