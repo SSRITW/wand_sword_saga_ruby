@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package protocol;
+
+// 加密需要的key
+// 暗号化に必要のKey
+message S2C_Key {
+  int64 key = 1;
+}
+
+// 验证token
+// token検証
+message C2S_VerifyToken {
+  string token = 1;
+}
+
+// token検証結果
+message S2C_VerifyToken {
+  int32 code = 1; // 1==成功
+  string account_id = 2;
+  int64 user_id = 3;
+}
+
+message C2S_Heartbeat {
+}

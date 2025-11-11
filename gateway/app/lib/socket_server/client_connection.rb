@@ -1,4 +1,4 @@
-require "json"
+require_relative '../protos/protocol_types'
 
 module SocketServer
   class ClientConnection
@@ -33,8 +33,8 @@ module SocketServer
     def handle
       @logger.info "接続: #{@client_id}"
 
-      # 最初のメッセージ
-      send_message({ type: 'connected', client_id: @client_id, timestamp: Time.now.to_i })
+      # 最初のメッセージ (Connected)
+      send_message(Protocol::Connected.new(client_id: @client_id))
 
       # authへタイムアウト監視を起動
       @auth_thread = Thread.new { auth_timeout_monitor }
@@ -64,14 +64,15 @@ module SocketServer
     end
 
     # Use ProtocolHandler to receive message
+    # @return [Hash, nil] { protocol_id: Integer, message: Protocol::XXX }
     def receive_message
-      message = @protocol_handler.decode(@socket)
+      result = @protocol_handler.decode(@socket)
 
-      if message
-        @logger.debug "account: #{@client_id}: #{message[:type]}"
+      if result
+        @logger.debug "Received from #{@client_id}: protocol_id=#{result[:protocol_id]}"
       end
 
-      message
+      result
     rescue EOFError
       @logger.info "account #{@client_id} closed...(EOF)"
       nil
@@ -81,15 +82,16 @@ module SocketServer
     end
 
     # 発信
-    # @param message [Hash]　todo protobuf
+    # @param message [Google::Protobuf::MessageExts] protobuf メッセージ
     # @return [Boolean]
     def send_message(message)
       return false if @closed
 
+      protocol_id = ProtocolTypes.get_id(message)
       success = @protocol_handler.send_message(@socket, message)
 
       if success
-        @logger.debug "to account: #{@client_id}: #{message[:type]}"
+        @logger.debug "Sent to #{@client_id}: protocol_id=#{protocol_id}, #{message.class.name}"
       else
         @logger.error "send message failed, account: #{@client_id}"
         close
@@ -124,48 +126,48 @@ module SocketServer
 
     private
 
-    def handle_message(message)
-      unless message.is_a?(Hash) && message[:type]
+    def handle_message(result)
+      unless result.is_a?(Hash) && result[:protocol_id] && result[:message]
         @logger.warn "無効メッセージ形式、from #{@client_id}"
-        send_message({ type: 'error', reason: 'Invalid message format' })
+        send_message(Protocol::Error.new(reason: 'Invalid message format'))
         return
       end
 
-      case message[:type]
-      when 'auth'
+      protocol_id = result[:protocol_id]
+      message = result[:message]
+
+      case protocol_id
+      when ProtocolTypes::C2S_VERIFY_TOKEN
         handle_auth(message)
-      when 'heartbeat', 'ping'
+      when ProtocolTypes::C2S_HEARTBEAT
         handle_heartbeat(message)
-      when 'chat'
-        # handle_chat(message)
-      when 'game_action'
-        #handle_game_action(message)
       else
-        @logger.warn "不明メッセージタイプ: #{message[:type]}, from: #{@client_id}"
-        send_message({ type: 'error', reason: "Unknown message type: #{message[:type]}" })
+        @logger.warn "不明メッセージタイプ: protocol_id=#{protocol_id}, from: #{@client_id}"
+        send_message(Protocol::Error.new(reason: "Unknown message type: #{protocol_id}"))
       end
     rescue => e
       @logger.error "handle_message error,from: #{@client_id}: #{e.message}"
       @logger.error e.backtrace.join("\n")
-      send_message({ type: 'error', reason: 'Internal server error' })
+      send_message(Protocol::Error.new(reason: 'Internal server error'))
     end
 
     # 認証処理
+    # @param message [Protocol::Auth]
     def handle_auth(message)
       if @authenticated
-        send_message({ type: 'error', reason: 'Already authenticated' })
+        send_message(Protocol::Error.new(reason: 'Already authenticated'))
         return
       end
 
-      token = message[:token]
-      unless token
+      token = message.token
+      unless token && !token.empty?
         @logger.warn "token欠如,from:　#{@client_id}"
-        send_message({ type: 'auth_failed', reason: 'Token required' })
+        send_message(Protocol::AuthFailed.new(reason: 'Token required'))
         close
         return
       end
 
-      # token検証
+      # token検証  todo
       user = verify_token(token)
 
       if user
@@ -187,25 +189,18 @@ module SocketServer
         # todo 必要性を検討
         store_user_mapping
 
-        send_message({
-          type: 'auth_success',
-          user_id: @user_id,
-          timestamp: Time.now.to_i
-        })
+        send_message(Protocol::AuthSuccess.new(user_id: @user_id))
       else
         @logger.warn "認証失敗,account: #{@client_id}"
-        send_message({ type: 'auth_failed', reason: 'Invalid token' })
+        send_message(Protocol::AuthFailed.new(reason: 'Invalid token'))
         close
       end
     end
 
+    # 心跳処理
+    # @param message [Protocol::Heartbeat]
     def handle_heartbeat(message)
       @last_heartbeat = Time.now
-      # todo 必要性を検討
-      send_message({
-        type: 'pong',
-        timestamp: Time.now.to_i
-      })
     end
 
 =begin
@@ -278,8 +273,7 @@ module SocketServer
 
         time_since_heartbeat = Time.now - @last_heartbeat
         if time_since_heartbeat > @heartbeat_timeout
-          @logger.warn " account: #{@client_id} timeout (#{time_since_heartbeat.to_i}�)"
-          send_message({ type: 'timeout', reason: 'Heartbeat timeout' })
+          @logger.warn "account: #{@client_id} heartbeat timeout (#{time_since_heartbeat.to_i})"
           close
           break
         end
@@ -293,7 +287,6 @@ module SocketServer
 
       unless @authenticated
         @logger.warn "account: #{@client_id}　認証タイムアウト"
-        send_message({ type: 'timeout', reason: 'Authentication timeout' })
         close
       end
     rescue => e

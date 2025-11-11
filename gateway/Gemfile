@@ -42,7 +42,13 @@ gem 'redis'
 
 gem 'concurrent-ruby'
 
+# Google Protocol Buffers for efficient binary serialization
+gem 'google-protobuf'
+
 group :development, :test do
+  # gRPC tools包含protoc编译器和Ruby插件
+  gem 'grpc-tools'
+
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
