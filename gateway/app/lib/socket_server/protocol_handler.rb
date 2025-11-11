@@ -101,18 +101,4 @@ module SocketServer
     end
   end
 
-  # 扩展: MessagePack协议处理器（示例）
-  # 如果将来需要支持MessagePack，可以这样实现：
-  #
-  # class MessagePackProtocolHandler < ProtocolHandler
-  #   def parse_json(data)
-  #     MessagePack.unpack(data, symbolize_keys: true)
-  #   end
-  #
-  #   def encode(message)
-  #     message_data = MessagePack.pack(message)
-  #     message_length = message_data.bytesize
-  #     [message_length].pack('N') + message_data
-  #   end
-  # end
 end

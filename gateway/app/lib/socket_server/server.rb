@@ -1,11 +1,11 @@
-require 'socket'
-require 'securerandom'
+require "socket"
+require "securerandom"
 
 module SocketServer
   class Server
     attr_reader :host, :port, :clients, :running
 
-    def initialize(host: '0.0.0.0', port: 9000)
+    def initialize(host: "0.0.0.0", port: 9000)
       @host = host
       @port = port
       @clients = Concurrent::Hash.new
@@ -129,6 +129,14 @@ module SocketServer
       @running
     end
 
+    # 認証成功後、クライアントを@clientsに追加
+    # @param account_id [String]
+    # @param connection [ClientConnection]
+    def add_authenticated_client(account_id, connection)
+      @clients[account_id] = connection
+      @logger.info "Client #{account_id} authenticated and added to clients list. Active clients: #{@clients.size}"
+    end
+
     private
 
     # 新接続を処理
@@ -146,7 +154,7 @@ module SocketServer
         logger: @logger
       )
 
-      @clients[account_id] = connection
+      # 認証成功後に@clientsに追加されるため、ここでは追加しない
 
       # Handle client (blocking in this thread)
       begin

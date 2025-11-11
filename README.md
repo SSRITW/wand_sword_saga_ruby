@@ -7,7 +7,7 @@
 
 > **Note**<br>
 > これは初めて日本語でコメントするプロジェクトです。 表現がうまく伝わっているか心配な時は中国語と日本語の2つの言語でコメントします。  
-> 这是我第一次尝试使用日语注释的项目，担心表达不准确的时候我会使用中日双语注释。
+> 这是我第一次尝试使用日语注释的项目。担心表达不准确的时候，我会使用中日双语注释。
 > 
 ## 想实现的架构 / 実現したいアーキテクチャ / Architecture
 ```mermaid
@@ -21,7 +21,7 @@ sequenceDiagram
 
     Note over Client,GS2: 1. 用户登录认证 / ユーザーログイン認証 / login Authentication Phase
     Client->>Gateway: 发送认证消息(http) <br> 認証token送信 (http)
-    Gateway-->>Client: 认证成功 <br> 認証成功
+    Gateway-->>Client: 认证成功，返回加密后的账号id <br> 認証成功、暗号化したaccountIdを戻る
 
     Note over Client,GS2: 2. 选择游戏服务器 / ゲームサーバー選択 / Server Selection Phase
     Gateway->>Client: 返回可用服务器列表 <br> 可用ゲームサーバーのリストを戻る
@@ -29,6 +29,9 @@ sequenceDiagram
 
     Note over Client,GS2: 3. 建立游戏连接 / ゲームサーバーと接続 / Game Connection Phase
     Client->>Gateway: TCP Socket 连接 <br>TCP Socketを接続 
+    Gateway-->>Client: 确认连接 <br> 接続確立
+    Client->>Gateway: 发送加密后的账号id <br>　暗号化したaccountIdを送信
+    Gateway-->>Client: 验证账号的合法性成功 <br> accountIdの正当性を検証成功
     Gateway->>GS1: 建立 gRPC 双向流 <br> gRPC 双方向ストリーミング接続 
     GS1-->>Gateway: 确认连接 <br> 接続確立
     Gateway->>Client: 连接成功 <br> 接続成功

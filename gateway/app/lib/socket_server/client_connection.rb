@@ -7,7 +7,7 @@ module SocketServer
 
     HEARTBEAT_TIMEOUT = 60
 
-    AUTH_TIMEOUT = 30
+    AUTH_TIMEOUT = 2
 
     def initialize(client_id:, socket:, address:, server:, logger:)
       @client_id = client_id
@@ -26,6 +26,8 @@ module SocketServer
       @heartbeat_timeout = HEARTBEAT_TIMEOUT
 
       @connected_at = Time.now
+      @heartbeat_thread = nil
+      @auth_thread = nil
     end
 
     def handle
@@ -34,9 +36,8 @@ module SocketServer
       # 最初のメッセージ
       send_message({ type: 'connected', client_id: @client_id, timestamp: Time.now.to_i })
 
-      # heartbeat,authへタイムアウト監視を起動
-      heartbeat_thread = Thread.new { heartbeat_monitor }
-      auth_thread = Thread.new { auth_timeout_monitor }
+      # authへタイムアウト監視を起動
+      @auth_thread = Thread.new { auth_timeout_monitor }
 
       # メッセージ受信と処理
       loop do
@@ -47,8 +48,14 @@ module SocketServer
       end
 
       # 監視停止
-      heartbeat_thread&.kill
-      auth_thread&.kill
+      if @heartbeat_thread != nil
+        @heartbeat_thread&.kill
+        @logger.debug "client #{@client_id} @@heartbeat_thread killed"
+      end
+      if @auth_thread != nil
+        @auth_thread&.kill
+        @logger.debug "client #{@client_id} @auth_thread killed"
+      end
     rescue => e
       @logger.error "client #{@client_id} error: #{e.message}"
       @logger.error e.backtrace.join("\n")
@@ -164,7 +171,18 @@ module SocketServer
       if user
         @user_id = user.id
         @authenticated = true
+
+        # 認証成功後、認証タイムアウト監視を停止、heartbeat監視開始
+        @auth_thread&.kill
+        @auth_thread = nil
+        @logger.debug "client #{@client_id} @auth_thread killed"
+        #　heartbeat監視開始
+        @heartbeat_thread = Thread.new { heartbeat_monitor }
+
         @logger.info "account: #{@client_id} user_id #{@user_id}"
+
+        # 認証成功後、@clientsに追加
+        @server.add_authenticated_client(@client_id, self)
 
         # todo 必要性を検討
         store_user_mapping
