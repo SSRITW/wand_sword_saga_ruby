@@ -7,7 +7,9 @@ module SocketServer
 
     HEARTBEAT_TIMEOUT = 60
 
-    AUTH_TIMEOUT = 2
+    AUTH_TIMEOUT = 5
+
+    KEY_BASIS = 73
 
     def initialize(client_id:, socket:, address:, server:, logger:)
       @client_id = client_id
@@ -15,6 +17,9 @@ module SocketServer
       @address = address
       @server = server
       @logger = logger
+
+      #メッセージ暗号化キー
+      @key = rand(2**23)
 
       @protocol_handler = ProtocolHandler.new(logger: @logger)
 
@@ -33,8 +38,8 @@ module SocketServer
     def handle
       @logger.info "接続: #{@client_id}"
 
-      # 最初のメッセージ (Connected)
-      send_message(Protocol::Connected.new(client_id: @client_id))
+      # 最初のメッセージ (S2C_Key)
+      send_message(Protocol::S2C_Key.new(key: @key))
 
       # authへタイムアウト監視を起動
       @auth_thread = Thread.new { auth_timeout_monitor }
@@ -66,12 +71,13 @@ module SocketServer
     # Use ProtocolHandler to receive message
     # @return [Hash, nil] { protocol_id: Integer, message: Protocol::XXX }
     def receive_message
-      result = @protocol_handler.decode(@socket)
+      result = @protocol_handler.decode(@socket,@key)
 
       if result
         @logger.debug "Received from #{@client_id}: protocol_id=#{result[:protocol_id]}"
       end
-
+      #次のキーを設置
+      next_key_set
       result
     rescue EOFError
       @logger.info "account #{@client_id} closed...(EOF)"
@@ -168,8 +174,9 @@ module SocketServer
       # token検証  todo
       user = verify_token(token)
 
+      # todo
       if user
-        @user_id = user.id
+        @user_id = 123124
         @authenticated = true
 
         # 認証成功後、認証タイムアウト監視を停止、heartbeat監視開始
@@ -184,10 +191,10 @@ module SocketServer
         # 認証成功後、@clientsに追加
         @server.add_authenticated_client(@client_id, self)
 
-        send_message(Protocol::AuthSuccess.new(user_id: @user_id))
+        send_message(Protocol::S2C_VerifyToken.new(code: 1,user_id: @user_id))
       else
         @logger.warn "認証失敗,account: #{@client_id}"
-        send_message(Protocol::AuthFailed.new(reason: 'Invalid token'))
+        send_message(Protocol::S2C_VerifyToken.new(code: -1))
         close
       end
     end
@@ -196,6 +203,13 @@ module SocketServer
     # @param message [Protocol::Heartbeat]
     def handle_heartbeat(message)
       @last_heartbeat = Time.now
+      @logger.debug "client #{@client_id} handle_heartbeat..."
+    end
+
+    # 次のキーを計算し、正整数を確保
+    def next_key_set
+      next_key = @key*KEY_BASIS + 1
+      @key = next_key>=0?next_key:-next_key
     end
 
 =begin
@@ -293,7 +307,7 @@ module SocketServer
     # @return [User, nil] 無効とnil
     def verify_token(token)
       # TODO token認証実現
-
+      true
     rescue => e
       @logger.error "verify_token, account: #{e.message}"
       nil

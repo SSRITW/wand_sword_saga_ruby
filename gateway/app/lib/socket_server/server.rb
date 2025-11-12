@@ -147,7 +147,7 @@ module SocketServer
       @logger.info "New connection from #{address.inspect} (Client ID: #{account_id})"
 
       connection = ClientConnection.new(
-        account_id: account_id,
+        client_id: account_id,
         socket: socket,
         address: address,
         server: self,

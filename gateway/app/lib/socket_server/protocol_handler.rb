@@ -1,22 +1,24 @@
 require_relative '../protos/protocol_types'
+require_relative '../utils/hmac_helper'
 
 module SocketServer
   class ProtocolHandler
     # メッセージ上限
     MAX_MESSAGE_SIZE = 1024 * 1024
 
-    # protocolフォーマット: [4バイト長（big-endian）][2バイトprotocolID（big-endian）][protobufメッセージ本体]
+    # big-endian
+    # protocolフォーマット: [4バイト長][2バイトprotocolID][8バイト暗号][protobufメッセージ本体]
     def initialize(logger: Rails.logger)
       @logger = logger
     end
 
     # socketからメッセージを読み取ってデコードする
     # @param socket [TCPSocket]
-    # @return [Hash, nil] デコードしたデータ { protocol_id: Integer, message: Object }
-    def decode(socket)
+    # @return [Hash,nil] デコードしたデータ { protocol_id: Integer, message: Object }
+    def decode(socket,key)
       # 1. 4バイトまでを読み取る
       length_data = socket.read(4)
-      return nil if length_data.nil? || length_data.empty?
+      return nil if length_data.nil? ||  length_data.bytesize != 4
 
       message_length = length_data.unpack1('N')
 
@@ -28,7 +30,7 @@ module SocketServer
 
       # 2. 2バイトのプロトコルIDを読み取る
       protocol_id_data = socket.read(2)
-      return nil if protocol_id_data.nil?
+      return nil if protocol_id_data.nil?|| protocol_id_data.bytesize != 2
 
       protocol_id = protocol_id_data.unpack1('n')  # 'n' = unsigned short, big-endian
 
@@ -38,12 +40,22 @@ module SocketServer
         return nil
       end
 
-      # 3. protobufメッセージ本体を読み取る（長さ = メッセージの長さ）
-      # 3. 读取 protobuf 消息体（长度 = 协议本体的长度）
+      # 3. 暗号を読み取る
+      msg_sign_data = socket.read(8)
+      return nil if msg_sign_data.nil? || msg_sign_data.bytesize != 8
+
+      # 4. protobufメッセージ本体を読み取る（長さ = メッセージの長さ）
+      # 4. 读取 protobuf 消息体（长度 = 协议本体的长度）
       message_data = socket.read(message_length)
       return nil if message_data.nil? || message_data.bytesize != message_length
 
-      # 4. プロトコルIDに基づいてprotobufをデコード
+      # 5. 暗号検証
+      if Utils::HMACHelper.verify(protocol_id_data+message_data, msg_sign_data, key.to_s) == false
+        @logger.error "message sign verify fail : #{protocol_id}"
+        return nil
+      end
+
+      # 6. プロトコルIDに基づいてprotobufをデコード
       message_class = ProtocolTypes.get_class(protocol_id)
       message = message_class.decode(message_data)
 
@@ -114,7 +126,7 @@ module SocketServer
     # @param length [Integer]
     # @return [Boolean]
     def valid_message_length?(length)
-      length > 0 && length <= MAX_MESSAGE_SIZE
+      length > -1 && length <= MAX_MESSAGE_SIZE
     end
   end
 end
