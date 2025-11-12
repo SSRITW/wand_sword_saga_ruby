@@ -116,8 +116,6 @@ module SocketServer
         @logger.error "closed socket error, account  #{@client_id}: #{e.message}"
       end
 
-      # 認証されたと
-      cleanup_user_mapping if @authenticated
     end
 
     def closed?
@@ -178,16 +176,13 @@ module SocketServer
         @auth_thread&.kill
         @auth_thread = nil
         @logger.debug "client #{@client_id} @auth_thread killed"
-        #　heartbeat監視開始
+        # heartbeat監視開始
         @heartbeat_thread = Thread.new { heartbeat_monitor }
 
         @logger.info "account: #{@client_id} user_id #{@user_id}"
 
         # 認証成功後、@clientsに追加
         @server.add_authenticated_client(@client_id, self)
-
-        # todo 必要性を検討
-        store_user_mapping
 
         send_message(Protocol::AuthSuccess.new(user_id: @user_id))
       else
@@ -304,33 +299,6 @@ module SocketServer
       nil
     end
 
-    # todo 必要性検討
-    def store_user_mapping
-      return unless @user_id
 
-      begin
-        # user_id -> client_id
-        Redis.current.hset('user_to_client', @user_id, @client_id)
-        # client_id -> user_id
-        Redis.current.hset('client_to_user', @client_id, @user_id)
-        # タイムアウト時間設定(例外を防ぐ)
-        Redis.current.expire("user_to_client", 86400) # 24時間
-        Redis.current.expire("client_to_user", 86400)
-      rescue => e
-        @logger.error "store_user_mapping error: #{e.message}"
-      end
-    end
-
-    # todo 必要性検討
-    def cleanup_user_mapping
-      return unless @user_id
-
-      begin
-        Redis.current.hdel('user_to_client', @user_id)
-        Redis.current.hdel('client_to_user', @client_id)
-      rescue => e
-        @logger.error "cleanup_user_mapping error: #{e.message}"
-      end
-    end
   end
 end
