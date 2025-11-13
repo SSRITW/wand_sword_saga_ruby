@@ -2,6 +2,18 @@ syntax = "proto3";
 
 package protocol;
 
+// GatewayとGameServerとの通信サービス
+service GameServerService {
+  // 双方向ストリーミング：一つGateway接続は一つのプレイヤーの接続
+  rpc PlayerSession(stream G2G_Message) returns (stream G2G_Message);
+}
+
+message G2G_Message {
+  int32 protocol_id = 1;
+  bytes data = 2;
+}
+
+
 // 加密需要的key
 // 暗号化に必要のKey
 message S2C_Key {

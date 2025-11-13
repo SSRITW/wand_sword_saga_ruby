@@ -45,6 +45,8 @@ gem 'concurrent-ruby'
 # Google Protocol Buffers for efficient binary serialization
 gem 'google-protobuf'
 
+gem 'grpc'
+
 group :development, :test do
   # gRPC tools包含protoc编译器和Ruby插件
   gem 'grpc-tools'

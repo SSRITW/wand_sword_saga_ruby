@@ -117,6 +117,14 @@ GEM
     google-protobuf (4.33.0-x86_64-linux-gnu)
       bigdecimal
       rake (>= 13)
+    googleapis-common-protos-types (1.22.0)
+      google-protobuf (~> 4.26)
+    grpc (1.76.0-x64-mingw-ucrt)
+      google-protobuf (>= 3.25, < 5.0)
+      googleapis-common-protos-types (~> 1.0)
+    grpc (1.76.0-x86_64-linux-gnu)
+      google-protobuf (>= 3.25, < 5.0)
+      googleapis-common-protos-types (~> 1.0)
     grpc-tools (1.76.0)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
@@ -335,6 +343,7 @@ DEPENDENCIES
   debug
   dotenv-rails
   google-protobuf
+  grpc
   grpc-tools
   image_processing (~> 1.2)
   kamal

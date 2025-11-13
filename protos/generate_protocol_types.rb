@@ -14,7 +14,9 @@ require 'fileutils'
 PROTO_FILE = File.expand_path('msg.proto', __dir__)
 PROTO_DIR = File.dirname(PROTO_FILE)
 GATEWAY_PROTOS_DIR = File.expand_path('../gateway/app/lib/protos', __dir__)
-OUTPUT_FILE = File.join(GATEWAY_PROTOS_DIR, 'protocol_types.rb')
+GAME_SERVER_PROTOS_DIR = File.expand_path('../game_server/app/lib/protos', __dir__)
+GATEWAY_OUTPUT_FILE = File.join(GATEWAY_PROTOS_DIR, 'protocol_types.rb')
+GAME_SERVER_OUTPUT_FILE = File.join(GAME_SERVER_PROTOS_DIR, 'protocol_types.rb')
 
 # ID 範囲設定
 S2C_START_ID = 1      # サーバー -> クライアント、1 から開始
@@ -137,19 +139,38 @@ def generate_protobuf_ruby_file
 
   # 出力ディレクトリが存在することを確認
   FileUtils.mkdir_p(GATEWAY_PROTOS_DIR)
+  FileUtils.mkdir_p(GAME_SERVER_PROTOS_DIR)
 
   # protoc コマンドを構築
   gateway_dir = File.expand_path('../gateway', __dir__)
+  game_server_dir = File.expand_path('../game_server', __dir__)
 
-  cmd = "cd \"#{gateway_dir}\" && bundle exec grpc_tools_ruby_protoc " \
+  gateway_cmd = "cd \"#{gateway_dir}\" && bundle exec grpc_tools_ruby_protoc " \
         "--ruby_out=app/lib/protos " \
+        "--grpc_out=app/lib/protos " \
         "--proto_path=../protos " \
         "../protos/msg.proto"
 
-  puts "コマンドを実行: #{cmd}"
+  game_server_cmd = "cd \"#{game_server_dir}\" && bundle exec grpc_tools_ruby_protoc " \
+    "--ruby_out=app/lib/protos " \
+    "--grpc_out=app/lib/protos " \
+    "--proto_path=../protos " \
+    "../protos/msg.proto"
+
+  puts "コマンドを実行: #{gateway_cmd}"
 
   # コマンドを実行
-  success = system(cmd)
+  success = system(gateway_cmd)
+
+  unless success
+    puts "❌ エラー: protoc コンパイル失敗"
+    exit 1
+  end
+
+  puts "コマンドを実行: #{game_server_cmd}"
+
+  # コマンドを実行
+  success = system(game_server_cmd)
 
   unless success
     puts "❌ エラー: protoc コンパイル失敗"
@@ -159,6 +180,14 @@ def generate_protobuf_ruby_file
   msg_pb_file = File.join(GATEWAY_PROTOS_DIR, 'msg_pb.rb')
   if File.exist?(msg_pb_file)
     puts "✅ 生成成功: #{msg_pb_file}"
+  else
+    puts "❌ エラー: msg_pb.rb ファイルが生成されませんでした"
+    exit 1
+  end
+
+  game_msg_pb_file = File.join(GAME_SERVER_PROTOS_DIR, 'msg_pb.rb')
+  if File.exist?(game_msg_pb_file)
+    puts "✅ 生成成功: #{game_msg_pb_file}"
   else
     puts "❌ エラー: msg_pb.rb ファイルが生成されませんでした"
     exit 1
@@ -199,12 +228,14 @@ begin
   code = generate_protocol_types(messages)
 
   # 出力ディレクトリが存在することを確認
-  FileUtils.mkdir_p(File.dirname(OUTPUT_FILE))
+  FileUtils.mkdir_p(File.dirname(GATEWAY_OUTPUT_FILE))
+  FileUtils.mkdir_p(File.dirname(GAME_SERVER_OUTPUT_FILE))
 
   # ファイルに書き込み
-  File.write(OUTPUT_FILE, code)
+  File.write(GATEWAY_OUTPUT_FILE, code)
+  File.write(GAME_SERVER_OUTPUT_FILE, code)
 
-  puts "✅ 生成成功: #{OUTPUT_FILE}"
+  puts "✅ 生成成功: #{GATEWAY_OUTPUT_FILE}, #{GAME_SERVER_OUTPUT_FILE}"
   puts "\nID 割り当て:"
   puts "  S2C: #{S2C_START_ID} ~ #{S2C_START_ID + messages[:s2c].size - 1}"
   puts "  C2S: #{C2S_START_ID} ~ #{C2S_START_ID + messages[:c2s].size - 1}"
@@ -213,8 +244,8 @@ begin
   puts "✅ すべてのファイル生成完了！"
   puts "=========================================="
   puts "生成されたファイル："
-  puts "  1. #{File.join(GATEWAY_PROTOS_DIR, 'msg_pb.rb')}"
-  puts "  2. #{OUTPUT_FILE}"
+  puts "  1. #{File.join(GATEWAY_PROTOS_DIR, 'msg_pb.rb')}, #{File.join(GAME_SERVER_PROTOS_DIR, 'msg_pb.rb')}"
+  puts "  2. #{GATEWAY_OUTPUT_FILE}, #{GAME_SERVER_OUTPUT_FILE}"
 
 rescue => e
   puts "\n=========================================="
