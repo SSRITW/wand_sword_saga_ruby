@@ -13,6 +13,14 @@ message G2G_Message {
   bytes data = 2;
 }
 
+//プレイヤーがgatewayからgame_serverに接続時の最初のプロトコル
+//gateway到game_server链接时的第一条协议
+message Account_Connect {
+  string account_id = 1;
+  int64 user_id = 2;
+  int32 show_server_id = 3;
+}
+
 
 // 加密需要的key
 // 暗号化に必要のKey
@@ -20,18 +28,20 @@ message S2C_Key {
   int64 key = 1;
 }
 
-// 验证token
-// token検証
-message C2S_VerifyToken {
-  string token = 1;
+message C2S_Heartbeat {
 }
 
-// token検証結果
-message S2C_VerifyToken {
+// ゲームサーバーを選ぶ
+// 选游戏服进入
+message C2S_LoginGameServer {
+  string token = 1;
+  int32 show_server_id = 2;
+}
+
+// キャラクタの情報などを戻る
+message S2C_LoginGameServer {
   int32 code = 1; // 1==成功
   string account_id = 2;
   int64 user_id = 3;
-}
-
-message C2S_Heartbeat {
+  string name = 4;
 }

@@ -5,15 +5,16 @@
 require 'google/protobuf'
 
 
-descriptor_data = "\n\tmsg.proto\x12\x08protocol\"0\n\x0bG2G_Message\x12\x13\n\x0bprotocol_id\x18\x01 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"\x16\n\x07S2C_Key\x12\x0b\n\x03key\x18\x01 \x01(\x03\" \n\x0f\x43\x32S_VerifyToken\x12\r\n\x05token\x18\x01 \x01(\t\"D\n\x0fS2C_VerifyToken\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x12\n\naccount_id\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\x03\"\x0f\n\rC2S_Heartbeat2V\n\x11GameServerService\x12\x41\n\rPlayerSession\x12\x15.protocol.G2G_Message\x1a\x15.protocol.G2G_Message(\x01\x30\x01\x62\x06proto3"
+descriptor_data = "\n\tmsg.proto\x12\x08protocol\"0\n\x0bG2G_Message\x12\x13\n\x0bprotocol_id\x18\x01 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"N\n\x0f\x41\x63\x63ount_Connect\x12\x12\n\naccount_id\x18\x01 \x01(\t\x12\x0f\n\x07user_id\x18\x02 \x01(\x03\x12\x16\n\x0eshow_server_id\x18\x03 \x01(\x05\"\x16\n\x07S2C_Key\x12\x0b\n\x03key\x18\x01 \x01(\x03\"<\n\x13\x43\x32S_LoginGameServer\x12\r\n\x05token\x18\x01 \x01(\t\x12\x16\n\x0eshow_server_id\x18\x02 \x01(\x05\"V\n\x13S2C_LoginGameServer\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x12\n\naccount_id\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\x03\x12\x0c\n\x04name\x18\x04 \x01(\t\"\x0f\n\rC2S_Heartbeat2V\n\x11GameServerService\x12\x41\n\rPlayerSession\x12\x15.protocol.G2G_Message\x1a\x15.protocol.G2G_Message(\x01\x30\x01\x62\x06proto3"
 
 pool = ::Google::Protobuf::DescriptorPool.generated_pool
 pool.add_serialized_file(descriptor_data)
 
 module Protocol
   G2G_Message = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.G2G_Message").msgclass
+  Account_Connect = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.Account_Connect").msgclass
   S2C_Key = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.S2C_Key").msgclass
-  C2S_VerifyToken = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.C2S_VerifyToken").msgclass
-  S2C_VerifyToken = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.S2C_VerifyToken").msgclass
+  C2S_LoginGameServer = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.C2S_LoginGameServer").msgclass
+  S2C_LoginGameServer = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.S2C_LoginGameServer").msgclass
   C2S_Heartbeat = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.C2S_Heartbeat").msgclass
 end
