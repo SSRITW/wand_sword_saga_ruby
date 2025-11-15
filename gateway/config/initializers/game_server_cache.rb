@@ -3,6 +3,10 @@ module GameServerCache
   GAME_SERVER_CACHE_KEY = "game_servers"
   GAME_SERVER_STATUS_REDIS_KEY = "game:svr:status"
 
+  class << self
+    attr_reader :game_servers
+  end
+
   # スレッドセーフのデータ型を使い
   @game_servers = Concurrent::Map.new
 
@@ -24,12 +28,12 @@ module GameServerCache
       svr_map[svr.show_server_id]=svr
     end
     # キャッシュに保存
-    @game_servers = Concurrent::Map.new(game_servers)
+    @game_servers = Concurrent::Map.new(svr_map)
     Rails.logger.info "game servers initialized...size:"+game_servers.size.to_s
   end
 
   def self.change(real_id,connection_online,connect_ip)
-    @game_servers.each do |svr|
+    @game_servers.each do |show_id,svr|
       if real_id ==svr.real_server_id
         svr.connect_ip = connect_ip
         svr.connection_online = connection_online
@@ -38,8 +42,20 @@ module GameServerCache
     end
   end
 
+  def self.get_available_server_address(user_id)
+    online_servers = @game_servers.select { |show_id, svr| svr.connection_online }
+    return nil if online_servers.empty?
+
+    # 根据user_id哈希选择服务器 (负载均衡)
+    server_array = online_servers.values
+    selected_server = server_array[user_id % server_array.size]
+
+    "#{selected_server.connect_ip}:#{selected_server.grpc_port}"
+  end
+
+
   def self.heartbeat(real_id)
-    @game_servers.each do |svr|
+    @game_servers.each do |show_id, svr|
       if real_id ==svr.real_server_id
         svr.last_heartbeat_timestamp = Time.now.to_i
       end

@@ -149,13 +149,13 @@ def generate_protobuf_ruby_file
         "--ruby_out=app/lib/protos " \
         "--grpc_out=app/lib/protos " \
         "--proto_path=../protos " \
-        "../protos/msg.proto"
+        "../protos/msg.proto ../protos/error_codes.proto"
 
   game_server_cmd = "cd \"#{game_server_dir}\" && bundle exec grpc_tools_ruby_protoc " \
     "--ruby_out=app/lib/protos " \
     "--grpc_out=app/lib/protos " \
     "--proto_path=../protos " \
-    "../protos/msg.proto"
+    "../protos/msg.proto ../protos/error_codes.proto"
 
   puts "コマンドを実行: #{gateway_cmd}"
 

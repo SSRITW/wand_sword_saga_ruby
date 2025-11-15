@@ -7,15 +7,15 @@ module SocketServer
     S2C_LOGIN_GAME_SERVER          =    2  # S2C_LoginGameServer
 
     # ========== クライアント -> サーバー (C2S) ==========
-    C2S_LOGIN_GAME_SERVER          = 1000  # C2S_LoginGameServer
-    C2S_HEARTBEAT                  = 1001  # C2S_Heartbeat
+    C2S_HEARTBEAT                  = 1000  # C2S_Heartbeat
+    C2S_LOGIN_GAME_SERVER          = 1001  # C2S_LoginGameServer
 
     # プロトコル ID -> クラスマッピング
     ID_TO_CLASS = {
       S2C_KEY                        => Protocol::S2C_Key,
       S2C_LOGIN_GAME_SERVER          => Protocol::S2C_LoginGameServer,
-      C2S_LOGIN_GAME_SERVER          => Protocol::C2S_LoginGameServer,
       C2S_HEARTBEAT                  => Protocol::C2S_Heartbeat,
+      C2S_LOGIN_GAME_SERVER          => Protocol::C2S_LoginGameServer,
     }.freeze
 
     # クラス -> プロトコル ID マッピング

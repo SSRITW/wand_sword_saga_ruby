@@ -1,4 +1,5 @@
 require_relative '../protos/protocol_types'
+require_relative '../grpc_client/game_server_client'
 
 module SocketServer
   class ClientConnection
@@ -17,8 +18,7 @@ module SocketServer
       @address = address
       @server = server
       @logger = logger
-
-      #メッセージ暗号化キー
+      # メッセージ暗号化キー
       @key = rand(2**23)
 
       @protocol_handler = ProtocolHandler.new(logger: @logger)
@@ -33,6 +33,9 @@ module SocketServer
       @connected_at = Time.now
       @heartbeat_thread = nil
       @auth_thread = nil
+
+      # gRPC クライアント / gRPC 客户端
+      @grpc_client = nil  # 添加这行
     end
 
     def handle
@@ -110,19 +113,7 @@ module SocketServer
       false
     end
 
-    def close
-      return if @closed
 
-      @closed = true
-      @logger.info "closed account: #{@client_id}, USERID: #{@user_id})"
-
-      begin
-        @socket.close unless @socket.closed?
-      rescue => e
-        @logger.error "closed socket error, account  #{@client_id}: #{e.message}"
-      end
-
-    end
 
     def closed?
       @closed || @socket.closed?
@@ -133,7 +124,7 @@ module SocketServer
     def handle_message(result)
       unless result.is_a?(Hash) && result[:protocol_id] && result[:message]
         @logger.warn "無効メッセージ形式、from #{@client_id}"
-        send_message(Protocol::Error.new(reason: 'Invalid message format'))
+        close
         return
       end
 
@@ -141,32 +132,32 @@ module SocketServer
       message = result[:message]
 
       case protocol_id
-      when ProtocolTypes::C2S_VERIFY_TOKEN
-        handle_auth(message)
+      when ProtocolTypes::C2S_LoginGameServer
+        handle_login_game_server(message)
       when ProtocolTypes::C2S_HEARTBEAT
         handle_heartbeat(message)
       else
-        @logger.warn "不明メッセージタイプ: protocol_id=#{protocol_id}, from: #{@client_id}"
-        send_message(Protocol::Error.new(reason: "Unknown message type: #{protocol_id}"))
+        # メッセージの転送
+        @grpc_client.send_message(protocol_id,  message)
       end
     rescue => e
       @logger.error "handle_message error,from: #{@client_id}: #{e.message}"
       @logger.error e.backtrace.join("\n")
-      send_message(Protocol::Error.new(reason: 'Internal server error'))
+      close
     end
 
     # 認証処理
     # @param message [Protocol::Auth]
-    def handle_auth(message)
+    def handle_login_game_server(message)
       if @authenticated
-        send_message(Protocol::Error.new(reason: 'Already authenticated'))
+        # todo 重複のレクエスト？
         return
       end
 
       token = message.token
       unless token && !token.empty?
         @logger.warn "token欠如,from:　#{@client_id}"
-        send_message(Protocol::AuthFailed.new(reason: 'Token required'))
+        send_message(Protocol::S2C_LoginGameServer.new(code: Protocol::ErrorCode::AUTH_TOKEN_REQUIRED))
         close
         return
       end
@@ -191,13 +182,15 @@ module SocketServer
         # 認証成功後、@clientsに追加
         @server.add_authenticated_client(@client_id, self)
 
-        send_message(Protocol::S2C_VerifyToken.new(code: 1,user_id: @user_id))
+        # ===== 追加：GameServerに接続 =====
+        connect_to_game_server
       else
         @logger.warn "認証失敗,account: #{@client_id}"
-        send_message(Protocol::S2C_VerifyToken.new(code: -1))
+        send_message(Protocol::S2C_VerifyToken.new(code: Protocol::ErrorCode::AUTH_FAILED))
         close
       end
     end
+
 
     # 心跳処理
     # @param message [Protocol::Heartbeat]
@@ -211,70 +204,6 @@ module SocketServer
       next_key = @key*KEY_BASIS + 1
       @key = next_key>=0?next_key:-next_key
     end
-
-=begin
-    # 处理聊天消息
-    def handle_chat(message)
-      unless @authenticated
-        send_message({ type: 'error', reason: 'Authentication required' })
-        return
-      end
-
-      text = message[:text]
-      unless text && !text.empty?
-        send_message({ type: 'error', reason: 'Message text required' })
-        return
-      end
-
-      @logger.info "聊天消息，来自用户 #{@user_id}: #{text}"
-
-      # 广播给所有客户端
-      @server.broadcast({
-                          type: 'chat',
-                          user_id: @user_id,
-                          text: text,
-                          timestamp: Time.now.to_i
-                        })
-    end
-
-    # 处理游戏操作消息
-    def handle_game_action(message)
-      unless @authenticated
-        send_message({ type: 'error', reason: 'Authentication required' })
-        return
-      end
-
-      action = message[:action]
-      data = message[:data]
-
-      unless action
-        send_message({ type: 'error', reason: 'Action required' })
-        return
-      end
-
-      @logger.info "游戏操作，来自用户 #{@user_id}: #{action}"
-
-      # 推送到Redis队列以供后台处理
-      begin
-        Redis.current.lpush('game_actions', {
-          user_id: @user_id,
-          client_id: @client_id,
-          action: action,
-          data: data,
-          timestamp: Time.now.to_i
-        }.to_json)
-
-        send_message({
-                       type: 'action_received',
-                       action: action,
-                       timestamp: Time.now.to_i
-                     })
-      rescue => e
-        @logger.error "推送游戏操作到Redis错误: #{e.message}"
-        send_message({ type: 'error', reason: 'Failed to process action' })
-      end
-    end
-=end
 
     def heartbeat_monitor
       loop do
@@ -313,6 +242,75 @@ module SocketServer
       nil
     end
 
+    # GameServerに接続
+    # 连接到GameServer
+    def connect_to_game_server
+
+      server_address = GameServerCache.get_available_server_address(@user_id)
+
+      if server_address == nil
+        @logger.error "No available game server for user #{@user_id}"
+        send_message(Protocol::Error.new(reason: 'No available game server'))
+        close
+        return
+      end
+
+      @grpc_client = GrpcClient::GameServerClient.new(
+        client_id: @client_id,
+        server_address: server_address,
+        logger: @logger
+      )
+
+      # レスポンスコールバック設定
+      # 设置响应回调
+      success = @grpc_client.connect do |response|
+        send_message(response)
+      end
+
+      if success
+        @logger.info "Client #{@client_id} connected to GameServer"
+
+        # todo
+        # 最初のメッセージをGameServerに送信
+        # 向GameServer发送第一条协议
+        first_message = encode(Protocol::Account_Connect.new(account_id: @client_id,user_id: @user_id))
+        @grpc_client.send_message(ProtocolTypes::Account_Connect,  first_message)
+      else
+        @logger.error "Failed to connect client #{@client_id} to GameServer"
+      end
+    rescue => e
+      @logger.error "connect_to_game_server error: #{e.message}"
+      @logger.error e.backtrace.join("\n")
+    end
+
+    # GameServerにメッセージを送信
+    # 向GameServer发送消息
+    def send_to_game_server(protocol_id, data)
+      return false unless @grpc_client && @grpc_client.connected?
+      @grpc_client.send_message(protocol_id, data)
+    rescue => e
+      @logger.error "send_to_game_server error: #{e.message}"
+      false
+    end
+
+
+    def close
+      return if @closed
+
+      @closed = true
+      @logger.info "closed account: #{@client_id}, USERID: #{@user_id})"
+
+      # gRPC接続を切断
+      # 断开gRPC连接
+      @grpc_client&.disconnect
+
+      begin
+        @socket.close unless @socket.closed?
+      rescue => e
+        @logger.error "closed socket error, account  #{@client_id}: #{e.message}"
+      end
+
+    end
 
   end
 end

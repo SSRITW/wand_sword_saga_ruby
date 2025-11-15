@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package protocol;
+
+// エラーコード定義
+// 错误码定义
+enum ErrorCode {
+  // ========== 通用错误码 / 汎用エラーコード (0-999) ==========
+  SUCCESS = 1;                       // 成功 / 成功
+  UNKNOWN_ERROR = -1;                // 未知错误 / 未知エラー
+  INVALID_PARAMETER = -2;            // 参数错误 / パラメータエラー
+  INTERNAL_ERROR = -3;               // 内部错误 / 内部エラー
+
+  // ========== 认证相关错误码 / 認証関連エラーコード (1000-1999) ==========
+  AUTH_TOKEN_REQUIRED = -1000;       // Token必须 / Token必須
+  AUTH_TOKEN_INVALID = -1001;        // Token无效 / Token無効
+  AUTH_TOKEN_EXPIRED = -1002;        // Token过期 / Token期限切れ
+  AUTH_FAILED = -1003;               // 认证失败 / 認証失敗
+  AUTH_TIMEOUT = -1004;              // 认证超时 / 認証タイムアウト
+
+  // ========== 连接相关错误码 / 接続関連エラーコード (2000-2999) ==========
+  CONNECTION_CLOSED = -2000;         // 连接关闭 / 接続切断
+  CONNECTION_TIMEOUT = -2001;        // 连接超时 / 接続タイムアウト
+  HEARTBEAT_TIMEOUT = -2002;         // 心跳超时 / ハートビートタイムアウト
+  HEARTBEAT_ERROR = -2003;          // 心跳异常（加速作弊） / ハートビート異常
+
+  // ========== 游戏服务器相关错误码 / GameServer関連エラーコード (3000-3999) ==========
+  GAME_SERVER_UNAVAILABLE = -3000;   // 游戏服务器不可用 / GameServer利用不可
+  GAME_SERVER_FULL = -3001;          // 游戏服务器已满 / GameServer満員
+  GAME_SERVER_CONNECT_FAILED = -3002;// 连接游戏服务器失败 / GameServer接続失敗
+
+  // ========== 协议相关错误码 / プロトコル関連エラーコード (4000-4999) ==========
+  PROTOCOL_INVALID_FORMAT = -4000;   // 协议格式错误 / プロトコルフォーマットエラー
+  PROTOCOL_UNKNOWN_TYPE = -4001;     // 未知协议类型 / 未知プロトコルタイプ
+  PROTOCOL_DECODE_FAILED = -4002;    // 协议解码失败 / プロトコルデコード失敗
+
+  // ========== 业务相关错误码 / ビジネス関連エラーコード (5000-9999) ==========
+
+}
