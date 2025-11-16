@@ -1,4 +1,5 @@
 class GameServer < ApplicationRecord
+  self.primary_key = 'show_server_id'
   serialize :flag, coder: JSON
 
   attr_accessor :connection_online, :boolean
