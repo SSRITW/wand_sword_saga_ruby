@@ -143,11 +143,9 @@ module SocketServer
     # @param socket [TCPSocket]
     def handle_client(socket)
       address = socket.peeraddr
-      account_id = generate_account_id
-      @logger.info "New connection from #{address.inspect} (Client ID: #{account_id})"
+      @logger.info "New connection from #{address.inspect} "
 
       connection = ClientConnection.new(
-        client_id: account_id,
         socket: socket,
         address: address,
         server: self,
@@ -163,14 +161,8 @@ module SocketServer
         @logger.error "Error handling client #{account_id}: #{e.message}"
         @logger.error e.backtrace.join("\n")
       ensure
-        remove_client(account_id)
+        remove_client(connection.client_id)
       end
-    end
-
-    # todo account_id生成
-    # @return [未定]
-    def generate_account_id
-      "client_#{Time.now.to_i}_#{SecureRandom.hex(4)}"
     end
 
     # 接続を削除

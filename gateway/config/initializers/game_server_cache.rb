@@ -42,15 +42,13 @@ module GameServerCache
     end
   end
 
-  def self.get_available_server_address(user_id)
-    online_servers = @game_servers.select { |show_id, svr| svr.connection_online }
-    return nil if online_servers.empty?
-
-    # 根据user_id哈希选择服务器 (负载均衡)
-    server_array = online_servers.values
-    selected_server = server_array[user_id % server_array.size]
-
-    "#{selected_server.connect_ip}:#{selected_server.grpc_port}"
+  def self.server_address_get(show_server_id)
+    @game_servers.each do |show_id,svr|
+      if show_server_id == show_id
+        svr.connection_online == true ? svr.connect_ip : nil
+      end
+    end
+    nil
   end
 
 

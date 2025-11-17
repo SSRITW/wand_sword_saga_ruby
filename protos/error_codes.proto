@@ -6,6 +6,7 @@ package protocol;
 // 错误码定义
 enum ErrorCode {
   // ========== 通用错误码 / 汎用エラーコード (0-999) ==========
+  _FIRST_CODE = 0;                   // （proto3要求第一个值必须为0）
   SUCCESS = 1;                       // 成功 / 成功
   UNKNOWN_ERROR = -1;                // 未知错误 / 未知エラー
   INVALID_PARAMETER = -2;            // 参数错误 / パラメータエラー

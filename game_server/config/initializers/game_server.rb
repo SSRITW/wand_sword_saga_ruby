@@ -19,7 +19,7 @@ def server_status_change(status)
   info_json = {
     real_server_id: ENV["GAME_SERVER_ID"].to_i,
     connection_online: status,
-    connect_ip: ActionCable.server.config.cable["url"]
+    connect_ip: ENV["GRPC_PORT"]
   }.to_json
 
   Rails.logger.debug "server_status_change: #{info_json}"
