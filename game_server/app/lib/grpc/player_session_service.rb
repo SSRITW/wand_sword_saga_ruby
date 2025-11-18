@@ -66,9 +66,15 @@ module GrpcService
       message_class = SocketServer::ProtocolTypes.get_class(protocol_id)
       message = message_class.decode(data)
 
+
+      session_data = @sessions[session_id]
+      # SessionContext作成
+      # 创建 SessionContext 对象
+      context = SessionContext.new(session_id, yielder, session_data, @logger)
+
       # ハンドラー呼び出し
       # 3. 调用处理器
-      handler.call(message, session_id, yielder)
+      handler.call(message, context)
 
     rescue Google::Protobuf::ParseError => e
       @logger.error "Failed to parse protocol_id=#{protocol_id}: #{e.message}"
@@ -78,6 +84,16 @@ module GrpcService
     end
 
     def cleanup_session(session_id)
+      if session_data && session_data[:player_id]
+        # 调用 PlayerService.offline 进行玩家下线处理
+        PlayerService.offline(session_data[:player_id])
+
+        # 清理 user_session_map
+        @user_session_map.delete(session_data[:player_id])
+
+        @logger.info "Player offline: player_id=#{session_data[:player_id]}, session=#{session_id}"
+      end
+
       @sessions.delete(session_id)
       @logger.info "Session cleaned up: #{session_id}"
     end

@@ -26,4 +26,8 @@ class PlayerService
     $player_datas[p.player_id] = player_data
     player_data
   end
+
+  def self.offline(player_id)
+    # todo
+  end
 end
