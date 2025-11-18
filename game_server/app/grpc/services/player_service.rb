@@ -28,6 +28,24 @@ class PlayerService
   end
 
   def self.offline(player_id)
-    # todo
+    if player_id==nil || player_id==0
+      return
+    end
+
+    player_data = $player_datas.delete(player_id)
+    if player_data == nil
+      return
+    end
+    player_data.with_lock do
+      begin
+        # 更新数据库的离线时间
+        Player.where(player_id: player_id).update_all(
+          offline_at: Time.now
+        )
+        Rails.logger.info "Player offline: player_id=#{player_id}, online_duration=#{player_data.online_duration}s"
+      rescue StandardError => e
+        Rails.logger.error "Failed to save player offline data: player_id=#{player_id}, error=#{e.message}"
+      end
+    end
   end
 end
