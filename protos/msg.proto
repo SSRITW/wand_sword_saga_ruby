@@ -8,6 +8,17 @@ service GameServerService {
   rpc PlayerSession(stream G2G_Message) returns (stream G2G_Message);
 }
 
+message PlayerInfo {
+  int64 player_id = 1;
+  int32 show_server_id = 2;
+  int32 real_server_id = 3;
+  string nickname = 4;
+  int32 level = 5;
+  int32 vip_level = 6;
+  int32 icon = 7;
+  int32 sex = 8; // 1 男 2 女
+}
+
 message G2G_Message {
   int32 protocol_id = 1;
   bytes data = 2;
@@ -17,8 +28,7 @@ message G2G_Message {
 //gateway到game_server链接时的第一条协议
 message Account_Connect {
   string account_id = 1;
-  int64 user_id = 2;
-  int32 show_server_id = 3;
+  int32 show_server_id = 2;
 }
 
 
@@ -42,6 +52,7 @@ message C2S_LoginGameServer {
 message S2C_LoginGameServer {
   int32 code = 1; // 1==成功
   string account_id = 2;
-  int64 user_id = 3;
-  string name = 4;
+  int64 player_id = 3;
+  PlayerInfo info = 4;
+  int32 is_init = 5;
 }

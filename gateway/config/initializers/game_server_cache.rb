@@ -42,13 +42,16 @@ module GameServerCache
     end
   end
 
-  def self.server_address_get(show_server_id)
+  def self.server_address_get(show_server_id,is_new_player = true)
     @game_servers.each do |show_id,svr|
       if show_server_id == show_id
-        svr.connection_online == true ? svr.connect_ip : nil
+        if svr.connection_online == false
+          break
+        end
+        return {"address":svr.connect_ip,"allow_connect": svr.allow_entry(is_new_player)}
       end
     end
-    nil
+    {"address":nil,"allow_connect":false}
   end
 
 

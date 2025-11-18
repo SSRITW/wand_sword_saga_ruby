@@ -54,18 +54,18 @@ class SessionContext
     update_session(:last_active_at, Time.now)
   end
 
-  # ユーザーIDを取得
-  # 获取用户ID
+  # プレイヤーIDを取得
+  # 获取玩家ID
   # @return [Integer, nil]
-  def user_id
-    @session_data[:user_id]
+  def player_id
+    @session_data[:player_id]
   end
 
-  # ユーザーIDを設定
-  # 设置用户ID
-  # @param uid [Integer]
-  def user_id=(uid)
-    update_session(:user_id, uid)
+  # プレイヤーIDを設定
+  # 设置玩家ID
+  # @param pid [Integer]
+  def player_id=(pid)
+    update_session(:player_id, pid)
   end
 
   # アカウントIDを取得
@@ -86,6 +86,6 @@ class SessionContext
   # 检查会话是否已验证
   # @return [Boolean]
   def authenticated?
-    !user_id.nil? && !account_id.nil?
+    !player_id.nil? && !account_id.nil?
   end
 end

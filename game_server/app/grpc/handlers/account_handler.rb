@@ -14,23 +14,23 @@ module Handlers
     # 连接上的第一条协议，对上下文初始化，返回账号角色信息
     # @param message [Protocol::Account_Connect] メッセージ / 消息
     def handle_account_connect(message, context)
-      @logger.info "Verifying token: #{message.token} (session: #{context.session_id})"
+      @logger.info "handle_account_connect: [#{message.account_id}, #{message.show_server_id}] (session: #{context.session_id})"
 
-      # TODO: 实际的验证逻辑
-      # 1. 验证token是否有效
-      # 2. 从数据库加载用户信息
-      # 3. 初始化会话状态
-      account_id = "acc_#{context.session_id[0..7]}"
-      context.user_id = 1213423
-      context.account_id = account_id
+      p = PlayerService.login_of_register(message.account_id, message.show_server_id)
+
+      info = p.player.to_proto
+
+      context.player_id = p.player_id
+      context.account_id = message.account_id
       context.touch  # 更新最后活跃时间
-
 
       # 示例响应
       response_data = Protocol::S2C_LoginGameServer.new(
         code: 1,
-        account_id: "acc_#{session_id[0..7]}",
-        user_id: rand(10000..99999)
+        account_id: message.account_id,
+        player_id: p.player_id,
+        info: info,
+        is_init: p.player.is_init,
       ).to_proto
 
       send_response(
@@ -38,6 +38,10 @@ module Handlers
         SocketServer::ProtocolTypes::S2C_LoginGameServer,
         response_data
       )
+
+      # 加载玩家全部数据
+      after_login_load(p)
+
     end
   end
 end

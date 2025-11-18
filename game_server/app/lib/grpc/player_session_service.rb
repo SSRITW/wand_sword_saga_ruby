@@ -5,9 +5,9 @@ require_relative 'session_context'
 module GrpcService
   class PlayerSessionService < Protocol::GameServerService::Service
     def initialize(handlers: {})
-      # sessionsの構造:　{ account_id: , user_id: ,created_at: ,last_active_at:}
+      # sessionsの構造:　{ account_id: , player_id: ,created_at: ,last_active_at:}
       @sessions = Concurrent::Hash.new
-      # userIdとsessionのマッピング：｛user_id:session_id｝
+      # userIdとsessionのマッピング：｛player_id:session_id｝
       @user_session_map = Concurrent::Hash.new
       @logger = Rails.logger
       @handlers = handlers
@@ -24,7 +24,7 @@ module GrpcService
       @sessions[session_id] = {
         created_at: Time.now,
         last_active_at: Time.now,
-        user_id: nil,  # 验证后填充
+        player_id: nil,  # 验证后填充
         account_id: nil
       }
 

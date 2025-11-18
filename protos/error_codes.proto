@@ -27,7 +27,7 @@ enum ErrorCode {
 
   // ========== 游戏服务器相关错误码 / GameServer関連エラーコード (3000-3999) ==========
   GAME_SERVER_UNAVAILABLE = -3000;   // 游戏服务器不可用 / GameServer利用不可
-  GAME_SERVER_FULL = -3001;          // 游戏服务器已满 / GameServer満員
+  GAME_SERVER_MAINTENANCE = -3001;          // 游戏服务器已满 / GameServer満員
   GAME_SERVER_CONNECT_FAILED = -3002;// 连接游戏服务器失败 / GameServer接続失敗
 
   // ========== 协议相关错误码 / プロトコル関連エラーコード (4000-4999) ==========
