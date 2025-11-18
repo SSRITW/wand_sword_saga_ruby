@@ -173,13 +173,24 @@ module SocketServer
       end
 
       # token検証
-      account_id = $redis.get(Constants::RedisConstants::LOGIN_TOKEN_PREFIX + token)
-      if account_id.empty?
+      account_data = $redis.get(Constants::RedisConstants::LOGIN_TOKEN_PREFIX + token)
+      if account_data.empty?
         @logger.warn "認証失敗,token: #{token}"
         send_message(Protocol::S2C_VerifyToken.new(code: Protocol::ErrorCode::AUTH_FAILED))
         close
       end
 
+      account_info = account_data.to_json
+      account_id = account_info["account_id"]
+
+      connect_info = GameServerCache.server_address_get(show_server_id)
+      if connect_info["address"] == ""
+        send_message(Protocol::S2C_VerifyToken.new(code: Protocol::ErrorCode::GAME_SERVER_UNAVAILABLE))
+      end
+
+      if connect_info["allow_connect"] == false
+        send_message(Protocol::S2C_VerifyToken.new(code: Protocol::ErrorCode::GAME_SERVER_MAINTENANCE))
+      end
       # 検証完了とtokenを消耗
       $redis.del(Constants::RedisConstants::LOGIN_TOKEN_PREFIX + token)
 
@@ -202,7 +213,7 @@ module SocketServer
       @server.add_authenticated_client(@client_id, self)
 
       # ===== 追加：GameServerに接続 =====
-      connect_to_game_server
+      connect_to_game_server(connect_info["address"])
     end
 
 
@@ -257,9 +268,7 @@ module SocketServer
 
     # GameServerに接続
     # 连接到GameServer
-    def connect_to_game_server
-
-      server_address = GameServerCache.server_address_get(@connect_show_server_id)
+    def connect_to_game_server(server_address)
 
       if server_address == nil
         @logger.error "No available game server for account: #{@client_id}, show_server_id: #{@connect_show_server_id}"
@@ -284,7 +293,7 @@ module SocketServer
         @logger.info "Client #{@client_id} connected to GameServer"
         # 最初のメッセージをGameServerに送信
         # 向GameServer发送第一条协议
-        first_message = encode(Protocol::Account_Connect.new(account_id: @client_id,user_id: @user_id))
+        first_message = encode(Protocol::Account_Connect.new(account_id: @client_id, show_server_id: @connect_show_server_id))
         @grpc_client.send_message(ProtocolTypes::Account_Connect,  first_message)
       else
         @logger.error "Failed to connect client #{@client_id} to GameServer"

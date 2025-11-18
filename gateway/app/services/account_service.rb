@@ -14,8 +14,9 @@ class AccountService
     if account.persisted?
       # 生成 token / トークンを生成
       token = SecureRandom.hex(32)
-      cache_token(account.account_id, token)
-      {code: 1, token: token, player_info: self.player_info_get(account.account_id)}
+      player_info = self.player_info_get(account.account_id)
+      cache_token(account.account_id,player_info, token)
+      {code: 1, token: token, player_info: player_info}
     else
       {code: -1, errors: account.errors.full_messages}
     end
@@ -29,10 +30,10 @@ class AccountService
   private
 
   # 将 token 缓存到 Redis / トークンをRedisにキャッシュ
-  def self.cache_token(account_id, token)
+  def self.cache_token(account_id,player_info, token)
     token_key = Constants::RedisConstants::LOGIN_TOKEN_PREFIX + token
     expire_time = ENV.fetch('LOGIN_TOKEN_VALID_TIME', 300).to_i
     # 存储 token -> account_id 的映射 / token -> account_id のマッピングを保存
-    $redis.setex(token_key, expire_time, account_id)
+    $redis.setex(token_key, expire_time, {account_id: account_id, player_info: player_info}.to_s)
   end
 end
