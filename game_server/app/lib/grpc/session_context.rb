@@ -23,7 +23,7 @@ class SessionContext
   # @param protocol_id [Integer] プロトコルID / 协议ID
   # @param data [String] シリアライズ済みデータ / 序列化后的数据
   def send_message(protocol_id, data)
-    @yielder << Protocol::G2GMessage.new(
+    @yielder << Protocol::G2G_Message.new(
       protocol_id: protocol_id,
       data: data
     )

@@ -99,8 +99,10 @@ module GrpcClient
 
         # スレッドを終了
         # 终止线程
-        @request_thread&.join(5)
-        @response_thread&.join(5)
+        # 避免线程 join 自己
+        current = Thread.current
+        @request_thread&.join(5) unless @request_thread == current
+        @response_thread&.join(5) unless @response_thread == current
 
         cleanup
       end

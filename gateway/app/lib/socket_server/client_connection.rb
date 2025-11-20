@@ -34,7 +34,7 @@ module SocketServer
       @authenticated = false
       @closed = false
 
-      @last_heartbeat = Time.now
+      @last_heartbeat = Time.now.to_i
 
       @connected_at = Time.now
       @heartbeat_thread = nil
@@ -138,7 +138,7 @@ module SocketServer
       message = result[:message]
 
       case protocol_id
-      when ProtocolTypes::C2S_LoginGameServer
+      when ProtocolTypes::C2S_LOGIN_GAME_SERVER
         handle_login_game_server(message)
       when ProtocolTypes::C2S_HEARTBEAT
         handle_heartbeat(message)
@@ -176,20 +176,23 @@ module SocketServer
       account_data = $redis.get(Constants::RedisConstants::LOGIN_TOKEN_PREFIX + token)
       if account_data.empty?
         @logger.warn "認証失敗,token: #{token}"
-        send_message(Protocol::S2C_VerifyToken.new(code: Protocol::ErrorCode::AUTH_FAILED))
+        send_message(Protocol::S2C_LoginGameServer.new(code: Protocol::ErrorCode::AUTH_FAILED))
         close
+        return
       end
 
-      account_info = account_data.to_json
+      account_info = JSON.parse(account_data)
       account_id = account_info["account_id"]
 
       connect_info = GameServerCache.server_address_get(show_server_id)
-      if connect_info["address"] == ""
-        send_message(Protocol::S2C_VerifyToken.new(code: Protocol::ErrorCode::GAME_SERVER_UNAVAILABLE))
+      if connect_info["address"] == nil || connect_info["address"] == ""
+        send_message(Protocol::S2C_LoginGameServer.new(code: Protocol::ErrorCode::GAME_SERVER_UNAVAILABLE))
+        return
       end
 
       if connect_info["allow_connect"] == false
-        send_message(Protocol::S2C_VerifyToken.new(code: Protocol::ErrorCode::GAME_SERVER_MAINTENANCE))
+        send_message(Protocol::S2C_LoginGameServer.new(code: Protocol::ErrorCode::GAME_SERVER_MAINTENANCE))
+        return
       end
       # 検証完了とtokenを消耗
       $redis.del(Constants::RedisConstants::LOGIN_TOKEN_PREFIX + token)
@@ -203,7 +206,7 @@ module SocketServer
       @auth_thread = nil
       @logger.debug "client #{@client_id} @auth_thread killed"
       # heartbeat監視開始
-      @last_heartbeat = Time.now
+      @last_heartbeat = Time.now.to_i
       @heartbeat_illegal_counter = 0
       @heartbeat_thread = Thread.new { heartbeat_monitor }
 
@@ -270,7 +273,7 @@ module SocketServer
     # 连接到GameServer
     def connect_to_game_server(server_address)
 
-      if server_address == nil
+      if server_address == ""
         @logger.error "No available game server for account: #{@client_id}, show_server_id: #{@connect_show_server_id}"
         close
         return
@@ -281,7 +284,7 @@ module SocketServer
         server_address: server_address,
         logger: @logger
       )
-
+      # todo grpc close
       # レスポンスコールバック設定
       # 设置响应回调
       success = @grpc_client.connect do |response|
@@ -293,8 +296,9 @@ module SocketServer
         @logger.info "Client #{@client_id} connected to GameServer"
         # 最初のメッセージをGameServerに送信
         # 向GameServer发送第一条协议
-        first_message = encode(Protocol::Account_Connect.new(account_id: @client_id, show_server_id: @connect_show_server_id))
-        @grpc_client.send_message(ProtocolTypes::Account_Connect,  first_message)
+        login_msg = Protocol::C2S_LoginGameServer.new(token: @client_id.to_s, show_server_id: @connect_show_server_id)
+        first_message = Protocol::C2S_LoginGameServer.encode(login_msg)
+        @grpc_client.send_message(ProtocolTypes::C2S_LOGIN_GAME_SERVER, first_message)
       else
         @logger.error "Failed to connect client #{@client_id} to GameServer"
       end

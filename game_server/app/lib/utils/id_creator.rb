@@ -11,10 +11,6 @@ class IdCreator
   def next_id
     @mutex.synchronize do
       @now_id+=1
-      # 防止 ID 溢出到下一个 worker 的范围
-      if @now_id >= @max_id
-        raise "Player ID overflow for worker #{@worker_id}"
-      end
       return @now_id
     end
   end

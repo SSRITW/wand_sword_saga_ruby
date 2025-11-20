@@ -1,5 +1,7 @@
 require 'test_helper'
 require 'socket'
+require 'net/http'
+require 'json'
 require_relative '../../app/lib/protos/protocol_types'
 require_relative '../../app/lib/utils/hmac_helper'
 
@@ -164,7 +166,24 @@ module SocketServer
     # ===== 基本接続テスト =====
 
     test "モッククライアント: サーバーに接続できる" do
+      #self.use_transactional_tests = false
+      #fixtures :none  # 或者不加载任何 fixtures
 
+      # POST 请求
+      uri = URI('http://localhost:3000/api/account/login')
+      http = Net::HTTP.new(uri.host, uri.port)
+      request = Net::HTTP::Post.new(uri.path, {'Content-Type' => 'application/json'})
+      request.body = { account_name: "123124", platform_id:0, platform_type:1 }.to_json
+
+      response = http.request(request)
+      response_json = JSON.parse(response.body)
+
+      @logger.info "login response: #{response_json}"
+
+      if response_json['code'] != 1
+        assert false, "login failed"
+      end
+      
       @client = MockClient.new(port: 9000, logger: @logger)
       result = @client.connect
 
@@ -178,21 +197,24 @@ module SocketServer
       refute_nil @client.secret_key, "secret_keyが初期化された"
       @logger.info "secret_key初期化完了: #{@client.secret_key}"
 
-      # 1. Authメッセージ送信
-      @logger.info "Authメッセージ送信中..."
-      result1 = @client.send_message(Protocol::C2S_VerifyToken.new(token: "token1"))
-      assert result1, "Authメッセージ送信成功"
-      S2C_VerifyToken = @client.receive_message
-      @logger.info "S2C_VerifyToken: #{S2C_VerifyToken[:message].code}"
-
-      # 2. Heartbeatメッセージ送信
-      (1...10).each do
-        sleep(10)
-        @logger.info "Heartbeatメッセージ送信中..."
-        result2 = @client.send_message(Protocol::C2S_Heartbeat.new)
+      Thread.new do
+        # 1. Heartbeatメッセージ送信
+        (1...10).each do
+          sleep(10)
+          @logger.info "Heartbeatメッセージ送信中..."
+          result2 = @client.send_message(Protocol::C2S_Heartbeat.new)
+        end
       end
 
-      @client.close?
+      # 2. Authメッセージ送信
+      @logger.info "Authメッセージ送信中..."
+      result1 = @client.send_message(Protocol::C2S_LoginGameServer.new(token: response_json['token'],show_server_id:1))
+      assert result1, "Authメッセージ送信成功"
+      S2C_VerifyToken = @client.receive_message
+      @logger.info "C2S_LoginGameServer: #{S2C_VerifyToken}"
+      sleep(300)
+      @client.close
     end
   end
+
 end

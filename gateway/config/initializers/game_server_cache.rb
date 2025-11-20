@@ -14,22 +14,24 @@ module GameServerCache
   # 初始化游戏服的基本信息(DB)和实际运行状态(redis)
   def self.init
     game_servers = GameServer.all.to_a
-    game_servers_status = $redis.hgetall(GAME_SERVER_STATUS_REDIS_KEY)
+    status_json = $redis.hgetall(GAME_SERVER_STATUS_REDIS_KEY).to_json
+    game_servers_status = JSON.parse(status_json)
 
-    svr_map = Hash.new
+    svr_map = Concurrent::Map.new
     game_servers.each do |svr|
       # 起動状態を取得
-      status_info = game_servers_status[svr.real_server_id]
-      if status_info!=nil
-        svr.connection_online = status_info.connection_online
-        svr.connect_ip = status_info.connect_ip
+      status_string = game_servers_status[svr.real_server_id.to_s]
+      if status_string != nil
+        status_info = JSON.parse(status_string)
+        svr.connection_online = status_info["connection_online"]
+        svr.connect_ip = status_info["connect_ip"]
       end
-      Rails.logger.debug "game servers info: "+svr.to_s
+      Rails.logger.debug "game servers info: show_server_id  #{svr.show_server_id},real_server_id:#{svr.real_server_id},connection_online:#{svr.connection_online}, connect_ip:#{svr.connect_ip}"
       svr_map[svr.show_server_id]=svr
     end
     # キャッシュに保存
-    @game_servers = Concurrent::Map.new(svr_map)
-    Rails.logger.info "game servers initialized...size:"+game_servers.size.to_s
+    @game_servers = svr_map
+    Rails.logger.info "game servers initialized...size:"+@game_servers.size.to_s
   end
 
   def self.change(real_id,connection_online,connect_ip)
@@ -42,16 +44,10 @@ module GameServerCache
     end
   end
 
-  def self.server_address_get(show_server_id,is_new_player = true)
-    @game_servers.each do |show_id,svr|
-      if show_server_id == show_id
-        if svr.connection_online == false
-          break
-        end
-        return {"address":svr.connect_ip,"allow_connect": svr.allow_entry(is_new_player)}
-      end
-    end
-    {"address":nil,"allow_connect":false}
+  def self.server_address_get(show_server_id, is_new_player = true)
+    svr = @game_servers[show_server_id]
+    return {"address"=>"", "allow_connect"=>false} if svr.nil? || !svr.connection_online
+    {"address"=> svr.connect_ip, "allow_connect"=> svr.allow_entry?(is_new_player)}
   end
 
 
@@ -79,7 +75,7 @@ Rails.application.config.after_initialize do
         case _channel
         when Constants::RedisConstants::GAME_SERVER_STATUS_SUBSCRIBE_KEY
           server_info = JSON.parse(_message)
-          GameServerCache.change(server_info[:real_server_id],server_info[:connection_online],server_info[:connect_ip])
+          GameServerCache.change(server_info["real_server_id"],server_info["connection_online"],server_info["connect_ip"])
           Rails.logger.info "game server　状態： #{_message}"
         when Constants::RedisConstants::GAME_SERVER_HEARTBEAT_SUBSCRIBE_KEY
           GameServerCache.heartbeat(_message.to_i)

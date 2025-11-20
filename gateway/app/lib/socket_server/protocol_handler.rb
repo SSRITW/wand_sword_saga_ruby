@@ -66,6 +66,10 @@ module SocketServer
     rescue EOFError
       @logger.debug "Socket EOF reached"
       nil
+    rescue IOError => e
+      # 客户端正常断开连接 / クライアントが正常に切断
+      @logger.debug "Socket closed: #{e.message}"
+      nil
     rescue => e
       @logger.error "Error decoding message: #{e.message}"
       @logger.error e.backtrace.join("\n")

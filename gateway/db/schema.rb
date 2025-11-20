@@ -33,7 +33,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_16_122419) do
 
   create_table "game_servers", primary_key: "show_server_id", id: :integer, default: nil, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.string "flag"
+    t.string "flag", default: "[]"
     t.string "name", null: false
     t.integer "open_time", default: 0
     t.integer "rcmd_status", default: 0

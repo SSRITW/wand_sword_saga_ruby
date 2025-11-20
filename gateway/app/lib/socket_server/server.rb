@@ -1,5 +1,6 @@
 require "socket"
 require "securerandom"
+require_relative "client_connection"
 
 module SocketServer
   class Server

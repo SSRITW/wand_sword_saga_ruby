@@ -34,6 +34,6 @@ class AccountService
     token_key = Constants::RedisConstants::LOGIN_TOKEN_PREFIX + token
     expire_time = ENV.fetch('LOGIN_TOKEN_VALID_TIME', 300).to_i
     # 存储 token -> account_id 的映射 / token -> account_id のマッピングを保存
-    $redis.setex(token_key, expire_time, {account_id: account_id, player_info: player_info}.to_s)
+    $redis.setex(token_key, expire_time, {account_id: account_id, player_info: player_info}.to_json)
   end
 end

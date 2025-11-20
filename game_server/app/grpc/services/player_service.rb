@@ -1,5 +1,7 @@
+require_relative '../../lib/models/player_data'
+
 class PlayerService
-  def self.login_of_register(account_id:, show_server_id:)
+  def self.login_of_register(account_id , show_server_id)
     p = Player.find_or_create_by(
       account_id: account_id,
       show_server_id: show_server_id
@@ -15,8 +17,7 @@ class PlayerService
       return $player_datas[p.player_id]
     end
 
-    p.online_at = Time.now
-    p.update("online_at")
+    p.update(online_at: Time.now)
 
     player_data =PlayerData.new(
       player_id: p.player_id,
