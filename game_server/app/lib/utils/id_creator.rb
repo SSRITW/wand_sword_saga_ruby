@@ -1,5 +1,6 @@
 class IdCreator
 
+  # worker_idを65,535以下の数値に設定する必要があり
   # 281474976710656個idが使える
   def initialize(worker_id, now_id)
     raise ArgumentError, "worker_id must be between 0 and 4095" unless worker_id.between?(0, 4095)
