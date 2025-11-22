@@ -12,7 +12,7 @@
 *   **`gateway/`**: ログイン認証とクライアントメッセージの検証・転送
 *   **`protos/`**: game_serverとgateway公用のプロトコル＆生成スクリプト
 
-## 実現したいアーキテクチャ / Architecture
+## アーキテクチャ
 ```mermaid
 sequenceDiagram
     participant Client as Game Client
@@ -59,6 +59,6 @@ sequenceDiagram
     Gateway->>GS1: gRPCストリームを閉じる
 ```
 
-## ライセンス / License
+## ライセンス
 
 このプロジェクトは個人学習用です。
