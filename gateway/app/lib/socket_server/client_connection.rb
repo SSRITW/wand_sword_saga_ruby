@@ -1,5 +1,6 @@
 require_relative '../protos/protocol_types'
 require_relative '../grpc_client/game_server_client'
+require "async"
 
 module SocketServer
   class ClientConnection
@@ -46,12 +47,11 @@ module SocketServer
 
     def handle
       @logger.info "接続: #{@address}"
-
       # 最初のメッセージ (S2C_Key)
       send_message(Protocol::S2C_Key.new(key: @key))
 
       # authへタイムアウト監視を起動
-      @auth_thread = Thread.new { auth_timeout_monitor }
+      @auth_thread = Async { auth_timeout_monitor }
 
       # メッセージ受信と処理
       loop do
@@ -63,12 +63,12 @@ module SocketServer
 
       # 監視停止
       if @heartbeat_thread != nil
-        @heartbeat_thread&.kill
-        @logger.debug "client #{@client_id} @@heartbeat_thread killed"
+        @heartbeat_thread.stop
+        @logger.debug "client #{@client_id} @heartbeat_thread stopped"
       end
       if @auth_thread != nil
-        @auth_thread&.kill
-        @logger.debug "client #{@client_id} @auth_thread killed"
+        @auth_thread.stop
+        @logger.debug "client #{@client_id} @auth_thread stopped"
       end
     rescue => e
       @logger.error "client #{@client_id} error: #{e.message}"
@@ -202,13 +202,13 @@ module SocketServer
       @authenticated = true
 
       # 認証成功後、認証タイムアウト監視を停止、heartbeat監視開始
-      @auth_thread&.kill
+      @auth_thread&.stop
       @auth_thread = nil
-      @logger.debug "client #{@client_id} @auth_thread killed"
+      @logger.debug "client #{@client_id} @auth_thread stopped"
       # heartbeat監視開始
       @last_heartbeat = Time.now.to_i
       @heartbeat_illegal_counter = 0
-      @heartbeat_thread = Thread.new { heartbeat_monitor }
+      @heartbeat_thread = Async { heartbeat_monitor }
 
       @logger.info "account: #{@client_id} connect..."
 

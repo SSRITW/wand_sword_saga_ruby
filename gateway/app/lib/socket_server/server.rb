@@ -1,17 +1,18 @@
 require "socket"
 require "securerandom"
+require "async"
 require_relative "client_connection"
 
 module SocketServer
   class Server
     attr_reader :host, :port, :clients, :running
 
-    def initialize(host: "0.0.0.0", port: 9000)
+    def initialize(host: "0.0.0.0", port: 9000, logger: Rails.logger)
       @host = host
       @port = port
       @clients = Concurrent::Hash.new
       @running = false
-      @logger = Rails.logger
+      @logger = logger
       @server_socket = nil
     end
 
@@ -20,19 +21,19 @@ module SocketServer
       @running = true
       @logger.info "Starting TCP Socket Server on #{@host}:#{@port}"
 
-      begin
+      Async do |task|
         @server_socket = TCPServer.new(@host, @port)
         @logger.info "Socket Server is listening on #{@host}:#{@port}"
 
         # 接続を受け取り
         while @running
           begin
-            # 新しい接続
+            # 新しい接続 (Async 2.x handles non-blocking accept automatically)
             client_socket = @server_socket.accept
 
-            # 単独処理
-            Thread.new(client_socket) do |socket|
-              handle_client(socket)
+            # 単独処理 (Spawn a new async task for each client)
+            task.async do
+              handle_client(client_socket)
             end
           rescue => e
             break unless @running
@@ -144,9 +145,9 @@ module SocketServer
     # @param socket [TCPSocket]
     def handle_client(socket)
       address = socket.peeraddr
-      @logger.info "New connection from #{address.inspect} "
-
-      connection = ClientConnection.new(
+      @logger.info "[Fiber:#{Fiber.current.object_id}] New connection from #{address.inspect}"
+      
+      connection = SocketServer::ClientConnection.new(
         socket: socket,
         address: address,
         server: self,

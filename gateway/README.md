@@ -79,3 +79,17 @@ Railsの標準コマンドで起動</br>使用 Rails 标准命令启动。
   "player_info": [...]
 }
 ```
+
+## TODO / 今後の改善計画
+
+*   **gRPC クライアントの多重化（Multiplexing）改修 / gRPC 客户端多路复用改造**
+    *   **現在の課題 / 当前问题**:
+        *   現在、プレイヤー接続ごとに新しい `GameServerClient` インスタンスを作成しており、それぞれが2つのスレッド（リクエスト送信とレスポンス受信）を起動しています。1000人のプレイヤーがいる場合、2000のスレッドが必要となり、リソース消費が激しいです。
+        *   目前，每个玩家连接都会创建一个新的 `GameServerClient` 实例，该实例会启动 2 个线程（一个用于发送请求，一个用于接收响应）。如果有 1000 个玩家，就意味着需要 2000 个线程，资源消耗巨大。
+    *   **計画 / 计划**:
+        1.  `msg.proto` を修正し、`G2G_Message` に `client_id` を含める。<br>修改 `msg.proto`，在 `G2G_Message` 中包含 `client_id`。
+        2.  `GameServerClient` をシングルトン（または共有インスタンス）に変更し、GameServer への gRPC ストリームを1本（または少数）のみ維持する。<br>更新 `GameServerClient` 为单例（或共享实例），只维护一条（或少量）到 GameServer 的 gRPC 流。
+        3.  受信したメッセージを `client_id` に基づいて正しい `ClientConnection` にルーティングする。<br>根据 `client_id` 将接收到的消息路由回正确的 `ClientConnection`。
+    *   **目標 / 目标**:
+        *   スレッド使用量を `2 * N` から `2 * M`（Nはプレイヤー数、MはGameServer数）に削減し、スケーラビリティを大幅に向上させる。
+        *   将线程使用量从 `2 * N` 降低到 `2 * M`（N 是玩家数，M 是 GameServer 数），提高扩展性。

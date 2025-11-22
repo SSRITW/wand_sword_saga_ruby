@@ -50,4 +50,10 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  STDOUT.sync = true
+  config.logger = Logger.new(STDOUT)
+  
+  # Use Fiber-safe isolation for CurrentAttributes and other thread-locals
+  config.active_support.isolation_level = :fiber
 end

@@ -84,4 +84,10 @@ Rails.application.configure do
   #
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  STDOUT.sync = true
+  config.logger = Logger.new(STDOUT)
+  
+  # Use Fiber-safe isolation for CurrentAttributes and other thread-locals
+  config.active_support.isolation_level = :fiber
 end
