@@ -1,0 +1,69 @@
+{
+  "data_list": [
+    {
+      "shop_id": 10001,
+      "shop_type": 1,
+      "sell_item": {
+        "id": 0,
+        "count": 1
+      },
+      "need_item": {
+        "id": 0,
+        "count": 0
+      },
+      "limit": 0
+    },
+    {
+      "shop_id": 10002,
+      "shop_type": 1,
+      "sell_item": {
+        "id": 0,
+        "count": 1
+      },
+      "need_item": {
+        "id": 0,
+        "count": 0
+      },
+      "limit": 5
+    },
+    {
+      "shop_id": 10003,
+      "shop_type": 1,
+      "sell_item": {
+        "id": 0,
+        "count": 1
+      },
+      "need_item": {
+        "id": 0,
+        "count": 0
+      },
+      "limit": 5
+    },
+    {
+      "shop_id": 10004,
+      "shop_type": 2,
+      "sell_item": {
+        "id": 0,
+        "count": 1
+      },
+      "need_item": {
+        "id": 0,
+        "count": 0
+      },
+      "limit": 5
+    },
+    {
+      "shop_id": 10005,
+      "shop_type": 2,
+      "sell_item": {
+        "id": 0,
+        "count": 1
+      },
+      "need_item": {
+        "id": 0,
+        "count": 0
+      },
+      "limit": 5
+    }
+  ]
+}

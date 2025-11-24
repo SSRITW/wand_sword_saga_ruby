@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package cfg;
+
+enum BagType {
+    BagType_EMPTY_PLACEHOLDER = 0;
+    BagType_NOT_IN = 1;
+    BagType_ITEM = 2;
+    BagType_EQUIPMENT = 3;
+    BagType_FOOD = 4;
+}
+enum ItemType {
+    ItemType_EMPTY_PLACEHOLDER = 0;
+    ItemType_CURRENCY = 1;
+    ItemType_MATERIAL = 2;
+    ItemType_FRAGMENT = 3;
+    ItemType_EQUIPMENT = 4;
+    ItemType_PACK = 5;
+    ItemType_COSTUME = 6;
+    ItemType_FOOD = 7;
+}
+enum ShopType {
+    ShopType_EMPTY_PLACEHOLDER = 0;
+    ShopType_CION_SHOP = 1;
+    ShopType_DIAMOND_SHOP = 2;
+}
+
+message ItemConfig {
+     int32 id = 1 ;
+     ItemType type = 2 ;
+     int32 sub_type = 3 ;
+     int32 bag_type = 4 ;
+     int32 stack_limit = 5 ;
+     int32 icon = 6 ;
+     string name = 7 ;
+     string desc = 8 ;
+}
+message Modelsitem {
+     int32 id = 1 ;
+     int32 count = 2 ;
+}
+message ShopConfig {
+     int32 shop_id = 1 ;
+     ShopType shop_type = 2 ;
+     Modelsitem sell_item = 3 ;
+     Modelsitem need_item = 4 ;
+     int32 limit = 5 ;
+}
+message vector2 {
+     float x = 1 ;
+     float y = 2 ;
+}
+message vector3 {
+     float x = 1 ;
+     float y = 2 ;
+     float z = 3 ;
+}
+message vector4 {
+     float x = 1 ;
+     float y = 2 ;
+     float z = 3 ;
+     float w = 4 ;
+}
+
+message Item {
+    repeated ItemConfig data_list = 1 [packed = false];
+}
+message Shop {
+    repeated ShopConfig data_list = 1 [packed = false];
+}
+
+
