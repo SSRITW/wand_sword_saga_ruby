@@ -103,3 +103,7 @@ config/environments/*.local.yml
 .env.staging
 .byebug_history
 .annotate_solargraph_cache
+
+# Excel 临时文件
+~$*.xlsx
+~$*.xls
