@@ -4,8 +4,7 @@ require_relative '../../config/pb_datas/cfg/schema_tables'
 class TablesTest < ActiveSupport::TestCase
   test "should load game data correctly" do
     # Assuming data is in config/pb_datas/data
-    data_dir = Rails.root.join('config', 'pb_datas', 'data')
-    tables = Tables.new(data_dir)
+    tables = Tables.new(Rails.root.join('config', 'pb_datas', 'data'))
 
     assert_not_nil tables.items, "Item config should be loaded"
     assert_not_nil tables.shops, "Shop config should be loaded"

@@ -4,12 +4,12 @@
       "shop_id": 10001,
       "shop_type": 1,
       "sell_item": {
-        "id": 0,
-        "count": 1
+        "id": 200001,
+        "count": 200
       },
       "need_item": {
-        "id": 0,
-        "count": 0
+        "id": 1,
+        "count": 10000
       },
       "limit": 0
     },
@@ -17,12 +17,12 @@
       "shop_id": 10002,
       "shop_type": 1,
       "sell_item": {
-        "id": 0,
-        "count": 1
+        "id": 200002,
+        "count": 100
       },
       "need_item": {
-        "id": 0,
-        "count": 0
+        "id": 1,
+        "count": 15000
       },
       "limit": 5
     },
@@ -30,12 +30,12 @@
       "shop_id": 10003,
       "shop_type": 1,
       "sell_item": {
-        "id": 0,
-        "count": 1
+        "id": 200003,
+        "count": 300
       },
       "need_item": {
-        "id": 0,
-        "count": 0
+        "id": 1,
+        "count": 20000
       },
       "limit": 5
     },
@@ -43,12 +43,12 @@
       "shop_id": 10004,
       "shop_type": 2,
       "sell_item": {
-        "id": 0,
-        "count": 1
+        "id": 1,
+        "count": 10000
       },
       "need_item": {
-        "id": 0,
-        "count": 0
+        "id": 2,
+        "count": 100
       },
       "limit": 5
     },
@@ -56,12 +56,12 @@
       "shop_id": 10005,
       "shop_type": 2,
       "sell_item": {
-        "id": 0,
-        "count": 1
+        "id": 200001,
+        "count": 200
       },
       "need_item": {
-        "id": 0,
-        "count": 0
+        "id": 2,
+        "count": 90
       },
       "limit": 5
     }

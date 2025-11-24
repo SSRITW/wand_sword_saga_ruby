@@ -2,52 +2,82 @@
   "data_list": [
     {
       "id": 1,
+      "name": "コイン",
       "type": 1,
       "sub_type": 0,
       "bag_type": 1,
       "stack_limit": 0,
       "icon": 0,
-      "name": "コイン",
       "desc": ""
     },
     {
       "id": 2,
+      "name": "ダイヤ",
       "type": 1,
       "sub_type": 0,
       "bag_type": 1,
       "stack_limit": 0,
       "icon": 0,
-      "name": "ダイヤ",
       "desc": ""
     },
     {
       "id": 3,
+      "name": "ショップコイン1",
       "type": 1,
       "sub_type": 0,
       "bag_type": 1,
       "stack_limit": 0,
       "icon": 0,
-      "name": "ショップコイン1",
       "desc": ""
     },
     {
       "id": 4,
+      "name": "ショップコイン2",
       "type": 1,
       "sub_type": 0,
       "bag_type": 1,
       "stack_limit": 0,
       "icon": 0,
-      "name": "ショップコイン2",
       "desc": ""
     },
     {
       "id": 5,
+      "name": "スタミナ",
       "type": 1,
       "sub_type": 0,
       "bag_type": 1,
       "stack_limit": 0,
       "icon": 0,
-      "name": "スタミナ",
+      "desc": ""
+    },
+    {
+      "id": 200001,
+      "name": "木材",
+      "type": 2,
+      "sub_type": 0,
+      "bag_type": 2,
+      "stack_limit": 999,
+      "icon": 0,
+      "desc": ""
+    },
+    {
+      "id": 200002,
+      "name": "石材",
+      "type": 2,
+      "sub_type": 0,
+      "bag_type": 2,
+      "stack_limit": 999,
+      "icon": 0,
+      "desc": ""
+    },
+    {
+      "id": 200003,
+      "name": "鍛造石",
+      "type": 2,
+      "sub_type": 0,
+      "bag_type": 2,
+      "stack_limit": 999,
+      "icon": 0,
       "desc": ""
     }
   ]

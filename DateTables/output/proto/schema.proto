@@ -25,25 +25,25 @@ enum ShopType {
     ShopType_DIAMOND_SHOP = 2;
 }
 
-message ItemConfig {
-     int32 id = 1 ;
-     ItemType type = 2 ;
-     int32 sub_type = 3 ;
-     int32 bag_type = 4 ;
-     int32 stack_limit = 5 ;
-     int32 icon = 6 ;
-     string name = 7 ;
-     string desc = 8 ;
-}
-message Modelsitem {
+message EntityItem {
      int32 id = 1 ;
      int32 count = 2 ;
+}
+message ItemConfig {
+     int32 id = 1 ;
+     string name = 2 ;
+     ItemType type = 3 ;
+     int32 sub_type = 4 ;
+     BagType bag_type = 5 ;
+     int32 stack_limit = 6 ;
+     int32 icon = 7 ;
+     string desc = 8 ;
 }
 message ShopConfig {
      int32 shop_id = 1 ;
      ShopType shop_type = 2 ;
-     Modelsitem sell_item = 3 ;
-     Modelsitem need_item = 4 ;
+     EntityItem sell_item = 3 ;
+     EntityItem need_item = 4 ;
      int32 limit = 5 ;
 }
 message vector2 {
