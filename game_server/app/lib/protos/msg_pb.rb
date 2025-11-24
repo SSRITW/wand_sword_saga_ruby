@@ -5,16 +5,20 @@
 require 'google/protobuf'
 
 
-descriptor_data = "\n\tmsg.proto\x12\x08protocol\"\x9e\x01\n\nPlayerInfo\x12\x11\n\tplayer_id\x18\x01 \x01(\x03\x12\x16\n\x0eshow_server_id\x18\x02 \x01(\x05\x12\x16\n\x0ereal_server_id\x18\x03 \x01(\x05\x12\x10\n\x08nickname\x18\x04 \x01(\t\x12\r\n\x05level\x18\x05 \x01(\x05\x12\x11\n\tvip_level\x18\x06 \x01(\x05\x12\x0c\n\x04icon\x18\x07 \x01(\x05\x12\x0b\n\x03sex\x18\x08 \x01(\x05\"0\n\x0bG2G_Message\x12\x13\n\x0bprotocol_id\x18\x01 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"\x16\n\x07S2C_Key\x12\x0b\n\x03key\x18\x01 \x01(\x03\"\x0f\n\rC2S_Heartbeat\"<\n\x13\x43\x32S_LoginGameServer\x12\r\n\x05token\x18\x01 \x01(\t\x12\x16\n\x0eshow_server_id\x18\x02 \x01(\x05\"\x7f\n\x13S2C_LoginGameServer\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x12\n\naccount_id\x18\x02 \x01(\x03\x12\x11\n\tplayer_id\x18\x03 \x01(\x03\x12\"\n\x04info\x18\x04 \x01(\x0b\x32\x14.protocol.PlayerInfo\x12\x0f\n\x07is_init\x18\x05 \x01(\x05\x32V\n\x11GameServerService\x12\x41\n\rPlayerSession\x12\x15.protocol.G2G_Message\x1a\x15.protocol.G2G_Message(\x01\x30\x01\x62\x06proto3"
+descriptor_data = "\n\tmsg.proto\x12\x08protocol\"\x9e\x01\n\nPlayerInfo\x12\x11\n\tplayer_id\x18\x01 \x01(\x03\x12\x16\n\x0eshow_server_id\x18\x02 \x01(\x05\x12\x16\n\x0ereal_server_id\x18\x03 \x01(\x05\x12\x10\n\x08nickname\x18\x04 \x01(\t\x12\r\n\x05level\x18\x05 \x01(\x05\x12\x11\n\tvip_level\x18\x06 \x01(\x05\x12\x0c\n\x04icon\x18\x07 \x01(\x05\x12\x0b\n\x03sex\x18\x08 \x01(\x05\"G\n\x04Item\x12\x0c\n\x04guid\x18\x01 \x01(\x03\x12\x0f\n\x07item_id\x18\x02 \x01(\x05\x12\x10\n\x08item_num\x18\x03 \x01(\x05\x12\x0e\n\x06is_new\x18\x04 \x01(\x05\"0\n\x0bG2G_Message\x12\x13\n\x0bprotocol_id\x18\x01 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"\x16\n\x07S2C_Key\x12\x0b\n\x03key\x18\x01 \x01(\x03\"\x0f\n\rC2S_Heartbeat\"<\n\x13\x43\x32S_LoginGameServer\x12\r\n\x05token\x18\x01 \x01(\t\x12\x16\n\x0eshow_server_id\x18\x02 \x01(\x05\"\x7f\n\x13S2C_LoginGameServer\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x12\n\naccount_id\x18\x02 \x01(\x03\x12\x11\n\tplayer_id\x18\x03 \x01(\x03\x12\"\n\x04info\x18\x04 \x01(\x0b\x32\x14.protocol.PlayerInfo\x12\x0f\n\x07is_init\x18\x05 \x01(\x05\"1\n\x0cS2C_ItemList\x12!\n\titem_list\x18\x01 \x03(\x0b\x32\x0e.protocol.Item\"6\n\x06\x43\x32S_GM\x12\x0c\n\x04type\x18\x01 \x01(\x05\x12\x0e\n\x06param1\x18\x02 \x01(\x05\x12\x0e\n\x06param2\x18\x03 \x01(\x05\"\x16\n\x06S2C_GM\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x32V\n\x11GameServerService\x12\x41\n\rPlayerSession\x12\x15.protocol.G2G_Message\x1a\x15.protocol.G2G_Message(\x01\x30\x01\x62\x06proto3"
 
 pool = ::Google::Protobuf::DescriptorPool.generated_pool
 pool.add_serialized_file(descriptor_data)
 
 module Protocol
   PlayerInfo = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.PlayerInfo").msgclass
+  Item = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.Item").msgclass
   G2G_Message = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.G2G_Message").msgclass
   S2C_Key = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.S2C_Key").msgclass
   C2S_Heartbeat = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.C2S_Heartbeat").msgclass
   C2S_LoginGameServer = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.C2S_LoginGameServer").msgclass
   S2C_LoginGameServer = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.S2C_LoginGameServer").msgclass
+  S2C_ItemList = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.S2C_ItemList").msgclass
+  C2S_GM = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.C2S_GM").msgclass
+  S2C_GM = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("protocol.S2C_GM").msgclass
 end

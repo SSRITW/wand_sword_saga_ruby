@@ -19,6 +19,13 @@ message PlayerInfo {
   int32 sex = 8; // 1 男 2 女
 }
 
+message Item {
+  int64 guid = 1;
+  int32 item_id = 2;
+  int32 item_num = 3;
+  int32 is_new = 4; //1 == new
+}
+
 message G2G_Message {
   int32 protocol_id = 1;
   bytes data = 2;
@@ -50,4 +57,20 @@ message S2C_LoginGameServer {
   int64 player_id = 3;
   PlayerInfo info = 4;
   int32 is_init = 5;
+}
+
+// ログイン時、データ更新時、発送
+message S2C_ItemList {
+  repeated Item item_list = 1;
+}
+
+// GMコマンド
+message C2S_GM {
+  int32 type = 1; // 1 == add item
+  int32 param1 = 2;
+  int32 param2 = 3;
+}
+
+message S2C_GM {
+  int32 code = 1; // 1==成功
 }

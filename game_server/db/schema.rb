@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_18_100700) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_24_000002) do
+  create_table "player_items", primary_key: ["player_id", "guid"], charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "count", default: 0, comment: "数"
+    t.datetime "created_at", null: false
+    t.bigint "guid", null: false, comment: "id"
+    t.integer "is_new", default: 1, comment: "新規フラグ"
+    t.integer "item_id", null: false, comment: "config_id"
+    t.bigint "player_id", null: false, comment: "プレイヤーid"
+    t.datetime "updated_at", null: false
+  end
+
   create_table "players", primary_key: "player_id", id: :bigint, default: nil, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "account_id"
     t.datetime "created_at", null: false

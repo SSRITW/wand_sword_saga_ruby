@@ -2,7 +2,7 @@
 # Source: msg.proto for package 'protocol'
 
 require 'grpc'
-require_relative 'msg_pb'
+require 'msg_pb'
 
 module Protocol
   module GameServerService

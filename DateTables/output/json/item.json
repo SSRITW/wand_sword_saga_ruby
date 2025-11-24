@@ -25,7 +25,7 @@
       "name": "ショップコイン1",
       "type": 1,
       "sub_type": 0,
-      "bag_type": 1,
+      "bag_type": 2,
       "stack_limit": 0,
       "icon": 0,
       "desc": ""
@@ -35,7 +35,7 @@
       "name": "ショップコイン2",
       "type": 1,
       "sub_type": 0,
-      "bag_type": 1,
+      "bag_type": 2,
       "stack_limit": 0,
       "icon": 0,
       "desc": ""

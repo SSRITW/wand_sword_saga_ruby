@@ -14,7 +14,6 @@ class CreatePlayers < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    # 添加联合主键
     execute "ALTER TABLE players ADD PRIMARY KEY (player_id);"
   end
 end

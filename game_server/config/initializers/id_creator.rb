@@ -39,14 +39,21 @@ module IdGenerator
     end
 
     def item_id_creator_init
-      # TODO: 实现 item ID 生成器初始化
-      @item_id_creator = nil
+      server_id = ENV.fetch("GAME_SERVER_ID", "1").to_i
+      max_id = PlayerItem.maximum(:guid)
+      @item_id_creator =IdCreator.new(
+        server_id,
+        max_id || 0
+      )
     end
   end
 end
 
 Rails.application.config.after_initialize do
-  unless defined?(Rails::Console) || Rails.env.test?
+  is_rake = defined?(Rake) && Rake.application.top_level_tasks.any?
+  is_server = defined?(Rails::Server) || ENV['RAILS_SERVER']
+
+  unless defined?(Rails::Console) || Rails.env.test? || is_rake || !is_server
     Rails.logger.info "IdGenerator initializing..."
     IdGenerator.init
     Rails.logger.info "IdGenerator initialized..."

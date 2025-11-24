@@ -52,3 +52,8 @@ rails server
 看到以下的日志，表明 gRPC 服务已经启动：
 
 `gRPC Server starting on 127.0.0.1:50051`
+
+
+## TODO 
+* アイテム　モジュール
+* ショップ　モジュール

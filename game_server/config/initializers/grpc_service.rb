@@ -6,9 +6,12 @@ require 'grpc'
 $grpc_server = nil
 
 Rails.application.config.after_initialize do
-  # コンソールとテスト環境以外で起動
-  # 只在非控制台和非测试环境启动
-  unless defined?(Rails::Console) || Rails.env.test?
+  # コンソールとテスト環境、rakeタスク以外で起動
+  # 只在非控制台、非测试环境、非rake任务时启动
+  is_rake = defined?(Rake) && Rake.application.top_level_tasks.any?
+  is_server = defined?(Rails::Server) || ENV['RAILS_SERVER']
+
+  unless defined?(Rails::Console) || Rails.env.test? || is_rake || !is_server
     Thread.new do
       begin
         # 設定読み込み
