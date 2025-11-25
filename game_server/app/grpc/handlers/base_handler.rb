@@ -50,15 +50,6 @@ module Handlers
 
     protected
 
-    # 辅助方法：发送响应消息到客户端（使用 context）
-    # 補助メソッド：クライアントにレスポンスメッセージを送信（context使用）
-    # @param context [SessionContext] セッションコンテキスト / 会话上下文
-    # @param protocol_id [Integer] プロトコルID / 协议ID
-    # @param response_data [String] レスポンスデータ / 响应数据
-    def send_response(context, protocol_id, response_data)
-      context.send_message(protocol_id, response_data)
-    end
-
     # 辅助方法：记录错误
     # 補助メソッド：エラーをログ記録
     def log_error(message, exception = nil)

@@ -25,18 +25,14 @@ module Handlers
       info = p.player.to_proto
       # 示例响应
       response_data = Protocol::S2C_LoginGameServer.new(
-        code: 1,
+        code: Protocol::ErrorCode::SUCCESS,
         account_id: account_id,
         player_id: p.player_id,
         info: info,
         is_init: p.player.is_init,
       ).to_proto
 
-      send_response(
-        context,
-        SocketServer::ProtocolTypes::S2C_LOGIN_GAME_SERVER,
-        response_data
-      )
+      context.send_message(SocketServer::ProtocolTypes::S2C_LOGIN_GAME_SERVER, response_data)
 
       # 加载玩家全部数据
       LoadService.after_login_load(p)
