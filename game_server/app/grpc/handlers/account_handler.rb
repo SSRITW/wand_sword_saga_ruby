@@ -20,14 +20,9 @@ module Handlers
     def handle_account_connect(message, context)
       @logger.info "handle_account_connect: [#{message.token}, #{message.show_server_id}] (session: #{context.session_id})"
       account_id = message.token.to_i
-      p = PlayerService.login_of_register(account_id, message.show_server_id)
+      p = PlayerService.login_of_register(context, account_id, message.show_server_id)
 
       info = p.player.to_proto
-
-      context.player_id = p.player_id
-      context.account_id = account_id
-      context.touch  # 更新最后活跃时间
-
       # 示例响应
       response_data = Protocol::S2C_LoginGameServer.new(
         code: 1,
@@ -45,7 +40,6 @@ module Handlers
 
       # 加载玩家全部数据
       LoadService.after_login_load(p)
-
     end
   end
 end

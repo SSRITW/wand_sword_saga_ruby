@@ -84,14 +84,23 @@ module GrpcService
     end
 
     def cleanup_session(session_id)
+      session_data = @sessions[session_id]
       if session_data && session_data[:player_id]
+        player_id = session_data[:player_id]
+
+        # 清理 player_data 中的 context 引用，避免内存泄漏
+        player_data = $player_datas[player_id]
+        if player_data
+          player_data.context = nil
+        end
+
         # 调用 PlayerService.offline 进行玩家下线处理
-        PlayerService.offline(session_data[:player_id])
+        PlayerService.offline(player_id)
 
         # 清理 user_session_map
-        @user_session_map.delete(session_data[:player_id])
+        @user_session_map.delete(player_id)
 
-        @logger.info "Player offline: player_id=#{session_data[:player_id]}, session=#{session_id}"
+        @logger.info "Player offline: player_id=#{player_id}, session=#{session_id}"
       end
 
       @sessions.delete(session_id)

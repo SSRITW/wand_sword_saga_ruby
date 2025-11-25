@@ -1,7 +1,7 @@
 require_relative '../../lib/models/player_data'
 
 class PlayerService
-  def self.login_of_register(account_id , show_server_id)
+  def self.login_of_register(context, account_id, show_server_id)
     p = Player.find_or_create_by(
       account_id: account_id,
       show_server_id: show_server_id
@@ -12,8 +12,18 @@ class PlayerService
       new_player.vip_level = 0
     end
 
-    # todo 重复链接判断
+    context.player_id = p.player_id
+    context.account_id = account_id
+    context.touch  # 更新最后活跃时间
+
+    # todo もう一度レビューする必要がある
     if $player_datas[p.player_id] != nil
+      if $player_datas[p.player_id].context == context
+        Rails.logger.error "重複のlogin_of_registerリクエスト？: player_id=#{player_id}"
+      else
+        Rails.logger.debug "再接続？: player_id=#{player_id}"
+      end
+      $player_datas[p.player_id].context = context
       return $player_datas[p.player_id]
     end
 
@@ -23,11 +33,13 @@ class PlayerService
       player_id: p.player_id,
       player: p,
       loading: true,
+      context: context,
     )
     $player_datas[p.player_id] = player_data
     player_data
   end
 
+  # todo 遅延削除プレイヤーのメモリデータ
   def self.offline(player_id)
     if player_id==nil || player_id==0
       return

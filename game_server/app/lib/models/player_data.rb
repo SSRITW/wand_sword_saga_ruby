@@ -8,6 +8,7 @@ PlayerData = Struct.new(
   :mutex,
   :online_at,
   :loading,
+  :context,  # # メッセージ送信のため、SessionContextを保存する
   keyword_init: true
 ) do
   def initialize(**args)
