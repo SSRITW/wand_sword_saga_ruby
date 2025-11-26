@@ -39,6 +39,12 @@ message ItemConfig {
      int32 icon = 7 ;
      string desc = 8 ;
 }
+message LevelConfig {
+     int32 level = 1 ;
+     int32 exp = 2 ;
+     int32 need_break = 3 ;
+    repeated EntityItem break_items = 4 [packed = false];
+}
 message ShopConfig {
      int32 shop_id = 1 ;
      ShopType shop_type = 2 ;
@@ -67,6 +73,9 @@ message Item {
 }
 message Shop {
     repeated ShopConfig data_list = 1 [packed = false];
+}
+message Level {
+    repeated LevelConfig data_list = 1 [packed = false];
 }
 
 

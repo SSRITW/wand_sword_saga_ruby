@@ -1,0 +1,160 @@
+{
+  "data_list": [
+    {
+      "level": 1,
+      "exp": 100,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 2,
+      "exp": 200,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 3,
+      "exp": 400,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 4,
+      "exp": 800,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 5,
+      "exp": 1600,
+      "need_break": 1,
+      "break_items": [
+        {
+          "id": 1,
+          "count": 10000
+        },
+        {
+          "id": 2,
+          "count": 100
+        }
+      ]
+    },
+    {
+      "level": 6,
+      "exp": 3200,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 7,
+      "exp": 6400,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 8,
+      "exp": 12800,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 9,
+      "exp": 25600,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 10,
+      "exp": 51200,
+      "need_break": 1,
+      "break_items": [
+        {
+          "id": 1,
+          "count": 10000
+        },
+        {
+          "id": 2,
+          "count": 100
+        }
+      ]
+    },
+    {
+      "level": 11,
+      "exp": 102400,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 12,
+      "exp": 204800,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 13,
+      "exp": 409600,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 14,
+      "exp": 819200,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 15,
+      "exp": 1638400,
+      "need_break": 1,
+      "break_items": [
+        {
+          "id": 1,
+          "count": 10000
+        },
+        {
+          "id": 2,
+          "count": 100
+        }
+      ]
+    },
+    {
+      "level": 16,
+      "exp": 3276800,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 17,
+      "exp": 6553600,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 18,
+      "exp": 13107200,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 19,
+      "exp": 26214400,
+      "need_break": 0,
+      "break_items": []
+    },
+    {
+      "level": 20,
+      "exp": 52428800,
+      "need_break": 1,
+      "break_items": [
+        {
+          "id": 1,
+          "count": 10000
+        },
+        {
+          "id": 2,
+          "count": 100
+        }
+      ]
+    }
+  ]
+}

@@ -51,6 +51,16 @@
       "desc": ""
     },
     {
+      "id": 6,
+      "name": "経験値",
+      "type": 1,
+      "sub_type": 0,
+      "bag_type": 1,
+      "stack_limit": 0,
+      "icon": 0,
+      "desc": ""
+    },
+    {
       "id": 200001,
       "name": "木材",
       "type": 2,
