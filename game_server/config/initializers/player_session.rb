@@ -16,7 +16,8 @@ module PlayerSessionHelper
       return {"code" => Protocol::ErrorCode::PLAYER_DATA_NOT_EXIST, "player_data" => nil}
     end
 
-    if player_data.context == nil
+    # loading中はオンラインではない
+    if player_data.context == nil || player_data.loading
       Rails.logger.error "プレイヤーのcontextが存在しない、メッセージ送信不可: player_id=#{player_id}"
       return {"code" => Protocol::ErrorCode::PLAYER_OFFLINE, "player_data" => nil}
     end

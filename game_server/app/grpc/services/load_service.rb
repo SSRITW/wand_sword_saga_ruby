@@ -1,10 +1,13 @@
 class LoadService
+
+  # プレイヤーデータを全部メモリに保存
   def self.after_login_load(player_data)
-    player_data.items = load_item(player_data.player_id)
+    player_data.items = PlayerItemService.load_items(player_data)
     player_data.loading = false
   end
 
-  def self.load_item(player_id)
-    Concurrent::Map.new
+  # プレイヤーに全部のデータを送信
+  def self.after_login_send(player_data)
+    PlayerItemService.send_item_full_list(player_data)
   end
 end

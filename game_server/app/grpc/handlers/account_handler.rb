@@ -23,7 +23,7 @@ module Handlers
       p = PlayerService.login_of_register(context, account_id, message.show_server_id)
 
       info = p.player.to_proto
-      # 示例响应
+
       response_data = Protocol::S2C_LoginGameServer.new(
         code: Protocol::ErrorCode::SUCCESS,
         account_id: account_id,
@@ -34,8 +34,8 @@ module Handlers
 
       context.send_message(SocketServer::ProtocolTypes::S2C_LOGIN_GAME_SERVER, response_data)
 
-      # 加载玩家全部数据
       LoadService.after_login_load(p)
+      LoadService.after_login_send(p)
     end
   end
 end
