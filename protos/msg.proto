@@ -26,6 +26,11 @@ message Item {
   int32 is_new = 4; //1 == new
 }
 
+message AwardItem {
+  int32 item_id = 1;
+  int32 item_num = 2;
+}
+
 message G2G_Message {
   int32 protocol_id = 1;
   bytes data = 2;

@@ -35,11 +35,16 @@ enum ErrorCode {
   PROTOCOL_UNKNOWN_TYPE = -4001;     // 未知协议类型 / 未知プロトコルタイプ
   PROTOCOL_DECODE_FAILED = -4002;    // 协议解码失败 / プロトコルデコード失敗
 
-  // ========== 业务相关错误码 / ビジネス関連エラーコード (5000-9999) ==========
-
   // ========== 配置相关错误码 / ゲーム設定configに関連 (5000-5050) ==========
   CONFIG_NOT_EXIST = -5000; // コンフィグがない
+  CONFIG_ITEM_ID_NOT_EXIST = -5001; //アイテムコンフィグがない
 
   // ========== Player数据相关错误码 / Playerデータに関連 (5100-5200) ==========
   PLAYER_DATA_NOT_EXIST = -5100; //プレイヤーデータが存在しない
+  PLAYER_OFFLINE = -5101; //プレイヤーがoffline
+
+  // ========== itemについて (5201-5300) ==========
+  ITEM_NOT_ENOUGH = -5201;  // アイテムが足りない
+  ITEM_ID_ILLEGAL = -5202;  // id異常値
+  ITEM_NUM_ILLEGAL = -5203; // num異常値
 }
