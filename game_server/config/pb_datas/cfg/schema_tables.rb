@@ -1,7 +1,7 @@
 require_relative './schema_pb'
 
 class Tables
-    attr_reader :items, :item_map, :shops, :shop_map, :shop_type_map
+    attr_reader :items, :item_map, :shops, :shop_map, :shop_type_map, :levels, :level_map
 
     def initialize(data_dir)
       Dir.glob(File.join(data_dir, '*.bytes')).each do |file|
@@ -40,6 +40,22 @@ class Tables
           @shop_type_map[shop.shop_type] = []
         end
         @shop_type_map[shop.shop_type] << shop
+      end
+
+      @shop_type_map = Hash.new
+      @shops.data_list.each do |shop|
+        if @shop_type_map.key?(shop.shop_type) == false
+          @shop_type_map[shop.shop_type] = []
+        end
+        @shop_type_map[shop.shop_type] << shop
+      end
+
+      @level_map = Hash.new
+      @levels.data_list.each do |level_cfg|
+        if @level_map.key?(level_cfg.level) == false
+          @level_map[level_cfg.level] = []
+        end
+        @level_map[level_cfg.level] << level_cfg
       end
     end
 end

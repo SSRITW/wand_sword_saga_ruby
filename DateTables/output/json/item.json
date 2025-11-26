@@ -8,7 +8,8 @@
       "bag_type": 1,
       "stack_limit": 0,
       "icon": 0,
-      "desc": ""
+      "desc": "",
+      "new_mark": 0
     },
     {
       "id": 2,
@@ -18,7 +19,8 @@
       "bag_type": 1,
       "stack_limit": 0,
       "icon": 0,
-      "desc": ""
+      "desc": "",
+      "new_mark": 0
     },
     {
       "id": 3,
@@ -28,7 +30,8 @@
       "bag_type": 2,
       "stack_limit": 0,
       "icon": 0,
-      "desc": ""
+      "desc": "",
+      "new_mark": 0
     },
     {
       "id": 4,
@@ -38,7 +41,8 @@
       "bag_type": 2,
       "stack_limit": 0,
       "icon": 0,
-      "desc": ""
+      "desc": "",
+      "new_mark": 0
     },
     {
       "id": 5,
@@ -48,7 +52,8 @@
       "bag_type": 1,
       "stack_limit": 0,
       "icon": 0,
-      "desc": ""
+      "desc": "",
+      "new_mark": 0
     },
     {
       "id": 6,
@@ -58,7 +63,8 @@
       "bag_type": 1,
       "stack_limit": 0,
       "icon": 0,
-      "desc": ""
+      "desc": "",
+      "new_mark": 0
     },
     {
       "id": 200001,
@@ -68,7 +74,8 @@
       "bag_type": 2,
       "stack_limit": 999,
       "icon": 0,
-      "desc": ""
+      "desc": "",
+      "new_mark": 0
     },
     {
       "id": 200002,
@@ -78,7 +85,8 @@
       "bag_type": 2,
       "stack_limit": 999,
       "icon": 0,
-      "desc": ""
+      "desc": "",
+      "new_mark": 0
     },
     {
       "id": 200003,
@@ -88,7 +96,8 @@
       "bag_type": 2,
       "stack_limit": 999,
       "icon": 0,
-      "desc": ""
+      "desc": "",
+      "new_mark": 0
     }
   ]
 }

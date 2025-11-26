@@ -65,8 +65,32 @@ class PlayerItemService
           return Protocol::ErrorCode::CONFIG_ITEM_ID_NOT_EXIST
         end
 
-        # todo 特別のレベルアップ処理
+        # 特別のレベルアップ処理
         if award.id == Constants::ITEM::EXP
+          now_exp = 0
+          exp_item = player_data.items.values.select { |item| item.item_id == award.id}
+          exp_item.each do |item|
+            now_exp += item.count
+          end
+
+          add_num = PlayerLevelService.level_up_check_and_update(player_data, award.count+now_exp)
+          if exp_item.empty?
+            new_item = PlayerItem.new(
+              player_id: player_data.player_id,
+              guid: IdGenerator.next_item_id,
+              item_id: award.id,
+              count: add_num,
+              is_new: item_config.new_mark
+            )
+            player_data.items[new_item.guid] = new_item
+            new_item_list << new_item
+            item_list_msg.item_list << new_item.to_proto
+          else
+            exp_item[0].count = add_num
+            exp_item[0].update(count: add_num)
+            item_list_msg.item_list << exp_item[0].to_proto
+          end
+
           next
         end
 
@@ -100,7 +124,7 @@ class PlayerItemService
             player_id: player_data.player_id,
             guid: IdGenerator.next_item_id,
             item_id: award.id,
-            is_new: 1
+            is_new: item_config.new_mark
           )
 
           if item_config.stack_limit > 0 && item_config.stack_limit < add_num

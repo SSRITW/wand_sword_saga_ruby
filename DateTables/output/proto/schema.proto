@@ -38,6 +38,7 @@ message ItemConfig {
      int32 stack_limit = 6 ;
      int32 icon = 7 ;
      string desc = 8 ;
+     int32 new_mark = 9 ;
 }
 message LevelConfig {
      int32 level = 1 ;
