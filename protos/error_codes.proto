@@ -47,4 +47,6 @@ enum ErrorCode {
   ITEM_NOT_ENOUGH = -5201;  // アイテムが足りない
   ITEM_ID_ILLEGAL = -5202;  // id異常値
   ITEM_NUM_ILLEGAL = -5203; // num異常値
+
+  GM_UNKNOWN_TYPE = -5400;
 }

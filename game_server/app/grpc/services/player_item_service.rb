@@ -1,34 +1,24 @@
 class PlayerItemService
-  def self.load_items(player_id)
-    # PlayerSessionHelper を使用してプレイヤーデータを取得
-    # 使用 PlayerSessionHelper 获取玩家数据
-    result = PlayerSessionHelper.player_data_get(player_id)
-    return result["code"] if result["code"] != Protocol::ErrorCode::SUCCESS
 
-    player_data = result["player_data"]
-
-    item_list = PlayerItem.find_by(player_id: player_id)
+  # プレイヤーのアイテムをDBからロードしてメモリに格納
+  # 从数据库加载玩家道具到内存
+  # @param player_data [PlayerData] プレイヤーデータオブジェクト / 玩家数据对象
+  # @return [void]
+  def self.load_items(player_data)
+    item_list = PlayerItem.find_by(player_id: player_data.player_id)
     item_data = Concurrent::Map.new
 
     item_list.each do |item|
       item_data[item.guid] = item
     end
     player_data.items = item_data
-
-    return Protocol::ErrorCode::SUCCESS
   end
 
   # 全部のアイテムデータをクライアントに送信（loginする時に）
-  def self.send_item_full_list(player_id)
-    # オンラインプレイヤーデータを取得
-    # 使用 PlayerSessionHelper 获取在线玩家数据
-    result = PlayerSessionHelper.online_player_data_get(player_id)
-    if result["code"] != Protocol::ErrorCode::SUCCESS
-      return result["code"]
-    end
-
-    player_data = result["player_data"]
-
+  # 发送所有道具数据到客户端（登录时）
+  # @param player_data [PlayerData] プレイヤーデータオブジェクト / 玩家数据对象
+  # @return [Integer] エラーコード / 错误码
+  def self.send_item_full_list(player_data)
     # item list プロトコル構築
     item_list_msg = Protocol::S2C_ItemList.new(item_list: [])
     player_data.items.each do |guid, item|
@@ -44,6 +34,12 @@ class PlayerItemService
   end
 
   # アイテムの増加
+  # 增加道具
+  # @param player_data [PlayerData] プレイヤーデータオブジェクト / 玩家数据对象
+  # @param item_list [Array<Protocol::AwardItem>] 追加するアイテムリスト / 要添加的道具列表
+  # @param reason [Integer] 追加理由（ログ用） / 添加原因（用于日志）
+  # @param param [String] 追加パラメータ（ログ用） / 添加参数（用于日志）
+  # @return [Hash] { "code": エラーコード, "item_msg": アイテムメッセージリスト } / { "code": 错误码, "item_msg": 道具消息列表 }
   # TODO 重要なデータから、変更するLogを持久化・定着する必要がある
   # TODO トランザクション保護の必要を検討  /  考虑是否需要事务保护
   def self.add_item(player_data, item_list, reason, param)
@@ -62,8 +58,10 @@ class PlayerItemService
         item_config = GAME_TABLES.item_map[award.id]
         if item_config == nil
           Rails.logger.error "itemが存在しない:player_id=#{player_data.player_id} award.item_id=#{award.id},reason=#{reason},param=#{param} "
-          return Protocol::ErrorCode::CONFIG_ITEM_ID_NOT_EXIST
+          return { "code": Protocol::ErrorCode::CONFIG_ITEM_ID_NOT_EXIST }
         end
+
+        return { "code": Protocol::ErrorCode::CONFIG_ITEM_ID_NOT_EXIST } if award.count <= 0
 
         # 特別のレベルアップ処理
         if award.id == Constants::ITEM::EXP
@@ -166,11 +164,15 @@ class PlayerItemService
       item_list_msg
     )
 
-    Protocol::ErrorCode::SUCCESS
+    return { "code": Protocol::ErrorCode::SUCCESS, "item_msg":item_list_msg.item_list }
   end
 
 
   # アイテム listが足りるかどうかを検証
+  # 检查道具列表是否足够
+  # @param player_data [PlayerData] プレイヤーデータオブジェクト / 玩家数据对象
+  # @param check_item_list [Array<Protocol::AwardItem>] チェックするアイテムリスト / 要检查的道具列表
+  # @return [Integer] エラーコード / 错误码
   def self.check_items_enough(player_data, check_item_list)
     # 事前に追加アイテムを合併し
     check_list = PlayerItem.merge_item(check_item_list)
@@ -195,6 +197,11 @@ class PlayerItemService
   end
 
   # アイテムが足りるかどうかを検証
+  # 检查单个道具是否足够
+  # @param player_data [PlayerData] プレイヤーデータオブジェクト / 玩家数据对象
+  # @param check_item_id [Integer] チェックするアイテムID / 要检查的道具ID
+  # @param check_item_num [Integer] チェックするアイテム数 / 要检查的道具数量
+  # @return [Integer] エラーコード / 错误码
   def self.check_item_enough(player_data, check_item_id, check_item_num)
 
     return Protocol::ErrorCode::ITEM_ID_ILLEGAL if check_item_id <= 0
@@ -211,6 +218,12 @@ class PlayerItemService
   end
 
   # アイテムlistの消耗
+  # 消耗道具列表
+  # @param player_data [PlayerData] プレイヤーデータオブジェクト / 玩家数据对象
+  # @param item_list [Array<Protocol::AwardItem>] 消耗するアイテムリスト / 要消耗的道具列表
+  # @param reason [Integer] 消耗理由（ログ用） / 消耗原因（用于日志）
+  # @param param [String] 消耗パラメータ（ログ用） / 消耗参数（用于日志）
+  # @return [Integer] エラーコード / 错误码
   def self.use_items(player_data, item_list, reason, param)
     # 変更についての送信メッセージ
     item_list_msg = Protocol::S2C_ItemList.new(item_list: [])
@@ -236,6 +249,13 @@ class PlayerItemService
   end
 
   # アイテムの消耗
+  # 消耗单个道具
+  # @param player_data [PlayerData] プレイヤーデータオブジェクト / 玩家数据对象
+  # @param item_id [Integer] 消耗するアイテムID / 要消耗的道具ID
+  # @param item_num [Integer] 消耗するアイテム数 / 要消耗的道具数量
+  # @param reason [Integer] 消耗理由（ログ用） / 消耗原因（用于日志）
+  # @param param [String] 消耗パラメータ（ログ用） / 消耗参数（用于日志）
+  # @return [Integer] エラーコード / 错误码
   def self.use_item(player_data, item_id, item_num, reason, param)
 
     code = check_item_enough(player_data, item_id, item_num)
@@ -256,7 +276,16 @@ class PlayerItemService
 
 
   private
+  # アイテムの消耗（内部メソッド）
+  # 消耗道具（内部方法）
   # ここでは、ロックを使用しないため、アクセスする箇所にロックをかける必要があります。
+  # 此方法不使用锁，调用处需要加锁
+  # @param player_data [PlayerData] プレイヤーデータオブジェクト / 玩家数据对象
+  # @param item_id [Integer] 消耗するアイテムID / 要消耗的道具ID
+  # @param item_num [Integer] 消耗するアイテム数 / 要消耗的道具数量
+  # @param reason [Integer] 消耗理由（ログ用） / 消耗原因（用于日志）
+  # @param param [String] 消耗パラメータ（ログ用） / 消耗参数（用于日志）
+  # @return [Array<Protocol::ItemData>] 変更されたアイテムのprotoメッセージリスト / 变更后的道具proto消息列表
   def self.use_item_private(player_data, item_id, item_num, reason, param)
     item_list = player_data.items.values
                            .select { |item| item.item_id == item_id }
