@@ -5,7 +5,7 @@ class PlayerItemService
   # @param player_data [PlayerData] プレイヤーデータオブジェクト / 玩家数据对象
   # @return [void]
   def self.load_items(player_data)
-    item_list = PlayerItem.find_by(player_id: player_data.player_id)
+    item_list = PlayerItem.where(player_id: player_data.player_id)
     item_data = Concurrent::Map.new
 
     item_list.each do |item|

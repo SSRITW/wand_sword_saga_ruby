@@ -25,8 +25,9 @@ class SessionContext
   def send_message(protocol_id, data)
     @yielder << Protocol::G2G_Message.new(
       protocol_id: protocol_id,
-      data: data
+      data: data.class.encode(data)
     )
+    @logger.debug "send message: protocol_id=#{protocol_id},#{data.class}"
   rescue StandardError => e
     @logger.error "Failed to send message: protocol_id=#{protocol_id}, error=#{e.message}"
     raise

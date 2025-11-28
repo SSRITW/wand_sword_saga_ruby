@@ -1,5 +1,5 @@
 module Handlers
-  class GMHandler < BaseHandler
+  class GmHandler < BaseHandler
     def handlers
       {
         SocketServer::ProtocolTypes::C2S_GM => method(:handle_gm_operation)

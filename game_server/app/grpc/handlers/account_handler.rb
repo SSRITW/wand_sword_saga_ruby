@@ -3,6 +3,7 @@
 require_relative '../../lib/protos/protocol_types'
 require_relative '../services/player_service'
 require_relative '../services/load_service'
+require_relative '../services/player_item_service'
 
 module Handlers
   class AccountHandler < BaseHandler
@@ -30,12 +31,14 @@ module Handlers
         player_id: p.player_id,
         info: info,
         is_init: p.player.is_init,
-      ).to_proto
+      )
 
       context.send_message(SocketServer::ProtocolTypes::S2C_LOGIN_GAME_SERVER, response_data)
 
       LoadService.after_login_load(p)
       LoadService.after_login_send(p)
+
+      Rails.logger.info "プレイヤーがログインした、player_id=[ #{p.player_id} | #{p.player.nickname}]"
     end
   end
 end
