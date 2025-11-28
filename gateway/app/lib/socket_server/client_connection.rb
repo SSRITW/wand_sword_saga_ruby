@@ -82,8 +82,8 @@ module SocketServer
     def receive_message
       result = @protocol_handler.decode(@socket,@key)
 
-      if result
-        @logger.debug "Received from #{@client_id}: protocol_id=#{result[:protocol_id]}"
+      if result && result[:protocol_id] != ProtocolTypes::C2S_HEARTBEAT
+        @logger.debug "Received from #{@client_id}:。。。protocol_id=#{result[:protocol_id]}"
       end
       #次のキーを設置
       next_key_set
@@ -235,7 +235,6 @@ module SocketServer
       end
       @heartbeat_illegal_counter = 0
       @last_heartbeat = now_time
-      @logger.debug "client #{@client_id} handle_heartbeat..."
     end
 
     # 次のキーを計算し、正整数を確保
@@ -287,9 +286,14 @@ module SocketServer
       # todo grpc close
       # レスポンスコールバック設定
       # 设置响应回调
-      success = @grpc_client.connect do |response|
-        # 返信は直接にクライアントに転送
-        send_message(response)
+      success = @grpc_client.connect do |g2g_message|
+        # ゼロコピー転送：GameServerからのbytesを直接転送
+        # 零拷贝转发：直接转发 GameServer 的 bytes
+        protocol_id = g2g_message.protocol_id
+        data = g2g_message.data  # 保持 bytes，不解码
+
+        # 直接发送原始数据，避免 decode + encode 的开销
+        @protocol_handler.send_raw_message(@socket, protocol_id, data)
       end
 
       if success

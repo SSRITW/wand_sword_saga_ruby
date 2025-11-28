@@ -124,6 +124,31 @@ module SocketServer
       false
     end
 
+    # socketに生のメッセージを送信（ゼロコピー転送用）
+    # 直接发送原始消息（用于零拷贝转发）
+    # @param socket [TCPSocket]
+    # @param protocol_id [Integer]
+    # @param message_bytes [String] 已序列化的 protobuf 消息
+    # @return [Boolean]
+    def send_raw_message(socket, protocol_id, message_bytes)
+      # メッセージサイズを検証
+      total_length = message_bytes.bytesize
+      unless valid_message_length?(total_length)
+        @logger.error "Message too large: #{total_length} bytes"
+        return false
+      end
+
+      # パック: [4バイト長][2バイトプロトコルID][protobufメッセージ本体]
+      data = [total_length].pack('N') + [protocol_id].pack('n') + message_bytes
+      
+      socket.write(data)
+      socket.flush
+      true
+    rescue => e
+      @logger.error "Error sending raw message: #{e.message}"
+      false
+    end
+
     private
 
     # メッセージ長が有効かどうかを検証

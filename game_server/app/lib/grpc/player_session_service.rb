@@ -28,16 +28,38 @@ module GrpcService
         account_id: nil
       }
 
-      Enumerator.new do |yielder|
+      # 送信キュー
+      # 发送队列
+      output_queue = Queue.new
+
+      # 入力処理スレッド
+      # 输入处理线程
+      Thread.new do
         begin
           @logger.info "New gRPC stream connection: #{session_id}"
 
           gateway_messages.each do |msg|
-            handle_gateway_message(msg, session_id, yielder)
+            handle_gateway_message(msg, session_id, output_queue)
           end
         rescue StandardError => e
-          @logger.error "Session #{session_id} error: #{e.message}"
+          @logger.error "Session #{session_id} input error: #{e.message}"
           @logger.error e.backtrace.join("\n")
+        ensure
+          # 入力終了またはエラー時にキューに停止信号を送る
+          # 输入结束或出错时向队列发送停止信号
+          output_queue << :stop
+        end
+      end
+
+      # 出力Enumerator
+      # 输出Enumerator
+      Enumerator.new do |yielder|
+        begin
+          loop do
+            msg = output_queue.pop
+            break if msg == :stop
+            yielder << msg
+          end
         ensure
           cleanup_session(session_id)
         end

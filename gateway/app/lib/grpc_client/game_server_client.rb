@@ -46,12 +46,8 @@ module GrpcClient
           @running = true
 
           # リクエスト送信スレッド開始
-          # 启动请求发送线程
+          # 启动请求发送线程（同时处理响应接收）
           @request_thread = Thread.new { send_requests }
-
-          # レスポンス受信スレッド開始
-          # 启动响应接收线程
-          @response_thread = Thread.new { receive_responses }
 
           @logger.info "gRPC stream established for client: #{@client_id}"
           true
@@ -101,7 +97,6 @@ module GrpcClient
         # 避免线程 join 自己
         current = Thread.current
         @request_thread&.join(5) unless @request_thread == current
-        @response_thread&.join(5) unless @response_thread == current
 
         cleanup
       end
@@ -134,17 +129,9 @@ module GrpcClient
       @stream_call = @stub.player_session(requests)
 
       @logger.debug "Request sender started for client: #{@client_id}"
-    rescue => e
-      @logger.error "Request sender error for client #{@client_id}: #{e.message}"
-      @logger.error e.backtrace.join("\n")
-      disconnect
-    end
-
-    # レスポンス受信スレッド
-    # 响应接收线程
-    def receive_responses
-      return unless @stream_call
-
+      
+      # 重要：必须在这里迭代响应流
+      # 重要：必须在这里迭代响应流
       @stream_call.each do |response|
         @logger.debug "Received from GameServer: protocol_id=#{response.protocol_id}, client=#{@client_id}"
 
@@ -153,9 +140,9 @@ module GrpcClient
         @response_callback&.call(response) if @running
       end
 
-      @logger.debug "Response receiver ended for client: #{@client_id}"
+      @logger.debug "Stream ended for client: #{@client_id}"
     rescue => e
-      @logger.error "Response receiver error for client #{@client_id}: #{e.message}"
+      @logger.error "Stream error for client #{@client_id}: #{e.message}"
       @logger.error e.backtrace.join("\n")
     ensure
       disconnect unless @running
