@@ -170,7 +170,7 @@ module SocketServer
       #fixtures :none  # 或者不加载任何 fixtures
 
       # POST 请求
-      uri = URI('http://localhost:3000/api/account/login')
+      uri = URI('http://localhost:3001/api/account/login')
       http = Net::HTTP.new(uri.host, uri.port)
       request = Net::HTTP::Post.new(uri.path, {'Content-Type' => 'application/json'})
       request.body = { account_name: "123124", platform_id:0, platform_type:1 }.to_json

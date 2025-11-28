@@ -16,6 +16,9 @@ module Gateway
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
+    # Add protos directory to load path so generated files can require each other
+    $LOAD_PATH.unshift(Rails.root.join("app/lib/protos").to_s)
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

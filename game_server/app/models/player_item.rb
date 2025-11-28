@@ -1,5 +1,4 @@
 class PlayerItem < ApplicationRecord
-  self.primary_keys = :player_id, :guid
 
   def to_proto
     Protocol::Item.new(
