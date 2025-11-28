@@ -1,3 +1,4 @@
+require_relative '../../lib/constants/item'
 class PlayerItemService
 
   # プレイヤーのアイテムをDBからロードしてメモリに格納
@@ -49,7 +50,7 @@ class PlayerItemService
     new_item_list = []
 
     # 事前に追加アイテムを合併し
-    add_item_list = PlayerItem.merge_item(item_list)
+    add_item_list = PlayerItem.merge_item_from_award_item(item_list)
 
 
     player_data.with_lock do

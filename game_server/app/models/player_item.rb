@@ -26,4 +26,22 @@ class PlayerItem < ApplicationRecord
       }
   end
 
+
+  # 同じidのアイテムを合併する
+  # 合并相同 id 的道具数量
+  # @param item_list [Array<Protocol::AwardItem>] アイテムリスト / 道具列表
+  # @return [Array<Cfg::EntityItem>] 合併後のアイテムリスト / 合并后的道具列表
+  def self.merge_item_from_award_item(item_list)
+    return [] if item_list.empty?
+
+    item_list
+      .group_by(&:item_id)
+      .map { |item_id, items|
+        Cfg::EntityItem.new(
+          id: item_id,
+          count: items.sum(&:item_num)
+        )
+      }
+  end
+
 end

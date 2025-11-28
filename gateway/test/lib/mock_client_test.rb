@@ -212,8 +212,12 @@ module SocketServer
       assert result1, "C2S_LoginGameServer送信成功"
       S2C_VerifyToken = @client.receive_message
       @logger.info "S2C_VerifyToken: #{S2C_VerifyToken}"
-      result1 = @client.send_message(Protocol::C2S_GM.new(type: 1,param1:1,param2:100000))
-      assert result1, "C2S_GM送信成功"
+      S2C_ItemList = @client.receive_message
+      @logger.info "S2C_ItemList: #{S2C_ItemList}"
+      S2C_LoadEnd = @client.receive_message
+      @logger.info "S2C_LoadEnd: #{S2C_LoadEnd}"
+      result2 = @client.send_message(Protocol::C2S_GM.new(type: 1,param1:1,param2:100000))
+      assert result2, "C2S_GM送信成功"
       S2C_GM = @client.receive_message
       @logger.info "S2C_GM: #{S2C_GM}"
       sleep(300)

@@ -1,3 +1,5 @@
+require_relative '../../lib/constants/game_operation'
+
 module Handlers
   class GmHandler < BaseHandler
     def handlers
@@ -8,7 +10,7 @@ module Handlers
 
     private
     def handle_gm_operation(message, context)
-      if ENV.fetch('GRPC_POOL_SIZE', 0).to_i != 1
+      if ENV.fetch('GM_ON', 0).to_i != 1
         Rails.logger.error "不正GMリクエスト:player_id=#{context.player_id}, gm_type: #{message.type}"
         # todo close
         return
@@ -26,7 +28,7 @@ module Handlers
       code = Protocol::ErrorCode::GM_UNKNOWN_TYPE
       case message.type
       when Constants::GmOperation::ITEM
-        item_list =  [Protocol::AwardItem.new(id: message.param1, count: message.param2)]
+        item_list =  [Protocol::AwardItem.new(item_id: message.param1, item_num: message.param2)]
         result = PlayerItemService.add_item(player_data, item_list, Constants::GameOperation::GM, "")
         code = result["code"]
       end

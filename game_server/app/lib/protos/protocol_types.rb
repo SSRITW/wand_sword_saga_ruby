@@ -7,7 +7,8 @@ module SocketServer
     S2C_KEY                        =    1  # S2C_Key
     S2C_LOGIN_GAME_SERVER          =    2  # S2C_LoginGameServer
     S2C_ITEM_LIST                  =    3  # S2C_ItemList
-    S2C_GM                         =    4  # S2C_GM
+    S2C_LOAD_END                   =    4  # S2C_LoadEnd
+    S2C_GM                         =    5  # S2C_GM
 
     # ========== クライアント -> サーバー (C2S) ==========
     C2S_HEARTBEAT                  = 1000  # C2S_Heartbeat
@@ -19,6 +20,7 @@ module SocketServer
       S2C_KEY                        => Protocol::S2C_Key,
       S2C_LOGIN_GAME_SERVER          => Protocol::S2C_LoginGameServer,
       S2C_ITEM_LIST                  => Protocol::S2C_ItemList,
+      S2C_LOAD_END                   => Protocol::S2C_LoadEnd,
       S2C_GM                         => Protocol::S2C_GM,
       C2S_HEARTBEAT                  => Protocol::C2S_Heartbeat,
       C2S_LOGIN_GAME_SERVER          => Protocol::C2S_LoginGameServer,

@@ -145,7 +145,7 @@ module SocketServer
       else
         if @authenticated
           # メッセージの転送
-          @grpc_client.send_message(protocol_id,  message)
+          @grpc_client.send_message(protocol_id,  message.class.encode(message))
         else
           @logger.error "[#{@client_id},#{@address} ]handle_message not authenticated try to send: #{protocol_id}"
         end
