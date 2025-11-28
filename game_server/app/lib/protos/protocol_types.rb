@@ -1,4 +1,5 @@
 require_relative 'msg_pb'
+require_relative 'error_codes_pb'
 
 module SocketServer
   module ProtocolTypes

@@ -209,9 +209,13 @@ module SocketServer
       # 2. Authメッセージ送信
       @logger.info "Authメッセージ送信中..."
       result1 = @client.send_message(Protocol::C2S_LoginGameServer.new(token: response_json['token'],show_server_id:1))
-      assert result1, "Authメッセージ送信成功"
+      assert result1, "C2S_LoginGameServer送信成功"
       S2C_VerifyToken = @client.receive_message
-      @logger.info "C2S_LoginGameServer: #{S2C_VerifyToken}"
+      @logger.info "S2C_VerifyToken: #{S2C_VerifyToken}"
+      result1 = @client.send_message(Protocol::C2S_GM.new(type: 1,param1:1,param2:100000))
+      assert result1, "C2S_GM送信成功"
+      S2C_GM = @client.receive_message
+      @logger.info "S2C_GM: #{S2C_GM}"
       sleep(300)
       @client.close
     end

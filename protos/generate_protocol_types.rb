@@ -65,6 +65,7 @@ def generate_protocol_types(messages)
   # コード生成
   code = <<~RUBY
     require_relative 'msg_pb'
+    require_relative 'error_codes_pb'
 
     module SocketServer
       module ProtocolTypes

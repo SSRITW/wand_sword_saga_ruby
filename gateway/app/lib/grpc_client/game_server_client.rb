@@ -75,7 +75,6 @@ module GrpcClient
         protocol_id: protocol_id,
         data: data
       )
-
       @request_queue << message
       @logger.debug "Queued message to GameServer: protocol_id=#{protocol_id}, client=#{@client_id}"
       true
